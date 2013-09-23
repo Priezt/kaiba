@@ -1,13 +1,10 @@
 require 'tools'
 
-strclass :Team
-
 class Duel
-	attr_reader :teams
+	bucket :players
 
 	def initialize
-		@teams = []
-		@teams << Team.new("red")
-		@teams << Team.new("green")
+		players << "Kaiba"
+		players << "Yugi"
 	end
 end

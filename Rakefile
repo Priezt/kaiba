@@ -1,5 +1,6 @@
 require 'duel'
 
 task :test do
-	p Duel.new.teams
+	d = Duel.new
+	p d.players['Yugi']
 end
