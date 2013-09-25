@@ -1,3 +1,9 @@
+module NameToString
+	def to_s
+		@name
+	end
+end
+
 module ActLikeString
 	def initialize(name, &block)
 		@name = name

@@ -2,5 +2,10 @@ require 'duel'
 
 task :test do
 	d = Duel.new
-	p d.players['Yugi']
+	d.players << Player.new("Kaiba"){
+		deck = Deck.new
+	}
+	d.players << Player.new("Yugi")
+	p d
 end
+
