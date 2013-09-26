@@ -11,25 +11,40 @@ end
 
 class Side
 	bucket :zones
-	def initialize
+	attr_accessor :player
+
+	def initialize(p)
+		self.player = p
 		zones << Zone.new("deck")
 		zones << Zone.new("extra")
 		zones << Zone.new("hand")
-		zones << Zone.new("remove")
 		zones << Zone.new("field")
 		zones << Zone.new("graveyard")
+		zones << Zone.new("remove")
 		(1..5).each do |n|
 			zones << Zone.new("monster:#{n}")
 			zones << Zone.new("spell:#{n}")
 		end
 	end
+
+	def dump
+		"#{player}: " + (zones.collect do |z|
+			z.dump
+		end.join " ")
+	end
 end
 
 class Board
 	bucket :sides
-	def initialize
-		self.sides << Side.new
-		self.sides << Side.new
+
+	def add_side(p)
+		self.sides << Side.new(p)
+	end
+
+	def dump
+		sides.collect do |s|
+			s.dump + "\n"
+		end.join ""
 	end
 end
 
@@ -39,7 +54,11 @@ class Zone
 
 	def initialize(name)
 		@name = name
-		cards ||= []
+		self.cards ||= []
+	end
+
+	def dump
+		"#{@name}(#{self.cards.count})"
 	end
 end
 
@@ -57,7 +76,17 @@ class Duel
 	bucket :players
 	attr_accessor :board
 
-	def initialize
+	def initialize(p1, p2)
+		self.players << p1
+		self.players << p2
 		self.board = Board.new
+		self.board.add_side p1
+		self.board.add_side p2
+	end
+
+	def dump
+		result = ""
+		result += self.board.dump
+		result
 	end
 end

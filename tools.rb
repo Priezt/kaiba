@@ -28,6 +28,12 @@ class Bucket < Hash
 	def <<(v)
 		self[v.to_s] = v
 	end
+
+	def collect(&block)
+		self.values.sort_by do |v|
+			v.to_s
+		end.collect &block
+	end
 end
 
 class Class

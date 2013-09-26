@@ -1,11 +1,9 @@
 require 'duel'
 
+task :default => [:test]
+
 task :test do
-	d = Duel.new
-	d.players << Player.new("Kaiba"){
-		deck = Deck.new
-	}
-	d.players << Player.new("Yugi")
-	p d
+	d = Duel.new Player.new("Kaiba"), Player.new("Yugi")
+	puts d.dump
 end
 
