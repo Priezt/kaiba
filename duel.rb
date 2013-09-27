@@ -9,6 +9,20 @@ class Player
 	end
 end
 
+class Timing; end
+class << Timing
+	def create(classname, &block)
+		self.const_set classname.to_s.capitalize, Class.new{ }
+		if block
+			(self.const_get classname.to_s.capitalize).class_eval &block
+		end
+	end
+end
+class Timing
+	create :free
+end
+
+
 class Side
 	bucket :zones
 	attr_accessor :player
@@ -75,6 +89,9 @@ end
 class Duel
 	bucket :players
 	attr_accessor :board
+	attr_accessor :timing
+	attr_accessor :turn_player
+	attr_accessor :phase
 
 	def initialize(p1, p2)
 		self.players << p1
@@ -82,6 +99,8 @@ class Duel
 		self.board = Board.new
 		self.board.add_side p1
 		self.board.add_side p2
+		self.turn_player = p1
+		self.phase = :game_start
 	end
 
 	def dump
