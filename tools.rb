@@ -1,3 +1,9 @@
+class String
+	def camel
+		self.split("_").map{|s| s.capitalize}.join ""
+	end
+end
+
 module NameToString
 	def to_s
 		@name

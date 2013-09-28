@@ -9,17 +9,18 @@ class Player
 	end
 end
 
-class Timing; end
+class Timing
+end
 class << Timing
 	def create(classname, &block)
-		self.const_set classname.to_s.capitalize, Class.new{ }
+		self.const_set classname.to_s.camel, Class.new(Timing){ }
 		if block
-			(self.const_get classname.to_s.capitalize).class_eval &block
+			(self.const_get classname.to_s.camel).class_eval &block
 		end
 	end
 end
 class Timing
-	create :free
+	create :any_time
 end
 
 
@@ -89,9 +90,14 @@ end
 class Duel
 	bucket :players
 	attr_accessor :board
-	attr_accessor :timing
+	attr_reader :timing
 	attr_accessor :turn_player
 	attr_accessor :phase
+	attr_accessor :turn_count
+
+	def timing=(new_timing)
+		@timing = eval "Timing::#{new_timing.to_s.camel}.new"
+	end
 
 	def initialize(p1, p2)
 		self.players << p1
@@ -100,12 +106,26 @@ class Duel
 		self.board.add_side p1
 		self.board.add_side p2
 		self.turn_player = p1
-		self.phase = :game_start
 	end
 
 	def dump
 		result = ""
 		result += self.board.dump
 		result
+	end
+
+	def change_phase(new_phase)
+		self.phase = new_phase
+	end
+
+	def prepare(first_player=nil)
+		fist_player = self.players.values.sort{|p| p.to_s}.first
+		self.turn_count = 0
+		self.phase = :start_game
+	end
+
+	def start
+		self.turn_count = 1
+		self.change_phase :draw
 	end
 end
