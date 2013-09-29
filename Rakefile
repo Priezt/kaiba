@@ -1,5 +1,9 @@
 require 'duel'
 
+if ENV['DEBUG']
+	Timing.debug = true
+end
+
 duel = Duel.new Player.new("Kaiba"), Player.new("Yugi")
 
 task :default => [:test]
@@ -10,6 +14,5 @@ task :test do
 end
 
 task :timing do
-	duel.timing = :any_time
-	p duel.timing
+	duel.start
 end

@@ -3,24 +3,52 @@ require 'tools'
 class Player
 	include NameToString
 	attr_accessor :deck
+	attr_accessor :life_point
 
 	def initialize(name)
 		@name = name
+		@life_point = 8000
 	end
 end
 
-class Timing
-end
+class Timing; end
 class << Timing
+	attr_accessor :debug
+	attr_accessor :enter_proc
+	attr_accessor :leave_proc
+
 	def create(classname, &block)
 		self.const_set classname.to_s.camel, Class.new(Timing){ }
 		if block
 			(self.const_get classname.to_s.camel).class_eval &block
 		end
 	end
+
+	def enter(&block)
+		@enter_proc = block
+	end
+
+	def leave(&block)
+		@leave_proc = block
+	end
 end
 class Timing
-	create :any_time
+	self.debug = false
+
+	create :prepare_game do
+		enter do
+			@first_player = players.values.sort_by{|p| p.to_s}.first
+			@turn_count = 0
+			goto :start_game
+		end
+	end
+
+	create :start_game do
+		enter do
+			@turn_count = 1
+			@phase = :draw
+		end
+	end
 end
 
 
@@ -94,9 +122,32 @@ class Duel
 	attr_accessor :turn_player
 	attr_accessor :phase
 	attr_accessor :turn_count
+	attr_accessor :first_player
 
-	def timing=(new_timing)
-		@timing = eval "Timing::#{new_timing.to_s.camel}.new"
+	def next_timing=(new_timing)
+		@next_timing = eval "Timing::#{new_timing.to_s.camel}.new"
+	end
+
+	def run_timing
+		if @timing
+			if @timing.class.leave_proc
+				self.instance_eval &(@timing.class.leave_proc)
+			end
+		else
+			if Timing.debug
+				puts "First Timing"
+			end
+		end
+		@timing = @next_timing
+		@next_timing = nil
+		if Timing.debug
+			puts "enter #{@timing.class.to_s}"
+		end
+		self.instance_eval &(@timing.class.enter_proc)
+	end
+
+	def goto(new_timing)
+		self.next_timing = new_timing
 	end
 
 	def initialize(p1, p2)
@@ -114,18 +165,13 @@ class Duel
 		result
 	end
 
-	def change_phase(new_phase)
-		self.phase = new_phase
-	end
-
-	def prepare(first_player=nil)
-		fist_player = self.players.values.sort{|p| p.to_s}.first
-		self.turn_count = 0
-		self.phase = :start_game
-	end
-
 	def start
-		self.turn_count = 1
-		self.change_phase :draw
+		self.next_timing = :prepare_game
+		while true
+			self.run_timing
+			if not @next_timing
+				break
+			end
+		end
 	end
 end
