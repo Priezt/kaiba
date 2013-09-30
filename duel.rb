@@ -1,5 +1,77 @@
 require 'tools'
 
+class Deck
+	attr_accessor :main_deck
+	attr_accessor :extra_deck
+
+	def initialize(&block)
+		@main_deck ||= []
+		@extra_deck ||= []
+		if block
+			self.instance_eval &block
+		end
+	end
+
+	def dump
+		"Main: #{
+			@main_deck.collect do |c|
+				c.to_s
+			end.join ", "
+		}\nExtra: #{
+			@extra_deck.collect do |c|
+				c.to_s
+			end.join ", "
+		}\n"
+	end
+end
+
+class Card
+	def self.properties
+		[
+			:name,
+			:type,
+			:sub_type,
+			:level,
+			:attack,
+			:defend,
+			:text,
+			:rank,
+		]
+	end
+
+	module PropertyMethods
+		Card.properties.each do |p|
+			define_method p do |*args|
+				if args.length == 0
+					eval "@#{p.to_s}"
+				else
+					eval "@#{p.to_s} = args[0]"
+				end
+			end
+		end
+	end
+
+	def self.[](card_name)
+		eval("Card::#{card_name.to_s}").new
+	end
+
+	extend Card::PropertyMethods
+	include Card::PropertyMethods
+
+	def initialize
+		self.class.properties.each do |p|
+			self.send p, (self.class.send p)
+		end
+		@face = :down
+		@position = :vertical
+	end
+
+	def to_s
+		@name
+	end
+end
+require 'card'
+
 class Player
 	include NameToString
 	attr_accessor :deck
@@ -8,6 +80,13 @@ class Player
 	def initialize(name)
 		@name = name
 		@life_point = 8000
+	end
+
+	def dump
+		result = ""
+		result += "#{@name}\n"
+		result += deck.dump
+		result
 	end
 end
 
@@ -102,16 +181,6 @@ class Zone
 
 	def dump
 		"#{@name}(#{self.cards.count})"
-	end
-end
-
-class Card
-	include NameToString
-
-	def initialize(name)
-		@face = :down
-		@position = :vertical
-		@name = name
 	end
 end
 

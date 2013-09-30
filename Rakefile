@@ -1,10 +1,17 @@
 require 'duel'
+require 'irb'
+require 'irb/completion'
 
 if ENV['DEBUG']
 	Timing.debug = true
 end
 
 duel = Duel.new Player.new("Kaiba"), Player.new("Yugi")
+duel.players["Kaiba"].deck = Deck.new do
+	40.times do
+		@main_deck << Card[:GeneticWolf]
+	end
+end
 
 task :default => [:test]
 
@@ -15,4 +22,18 @@ end
 
 task :timing do
 	duel.start
+end
+
+task :duel do
+	p duel
+end
+
+task :card do
+	p Card::GeneticWolf.new
+	p Card::GeneticWolf.attack
+	p Card['GeneticWolf'].attack
+end
+
+task :player do
+	puts duel.players["Kaiba"].dump
 end
