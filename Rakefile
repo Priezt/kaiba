@@ -21,7 +21,7 @@ task :test do
 end
 
 task :timing do
-	duel.start
+	duel.start :test_create_timing
 end
 
 task :duel do

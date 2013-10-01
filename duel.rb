@@ -97,6 +97,12 @@ class << Timing
 	attr_accessor :leave_proc
 
 	def create(classname, &block)
+		create_raw(classname) do
+			enter &block
+		end
+	end
+
+	def create_raw(classname, &block)
 		self.const_set classname.to_s.camel, Class.new(Timing){ }
 		if block
 			(self.const_get classname.to_s.camel).class_eval &block
@@ -113,22 +119,8 @@ class << Timing
 end
 class Timing
 	self.debug = false
-
-	create :prepare_game do
-		enter do
-			@first_player = players.values.sort_by{|p| p.to_s}.first
-			@turn_count = 0
-			goto :start_game
-		end
-	end
-
-	create :start_game do
-		enter do
-			@turn_count = 1
-			@phase = :draw
-		end
-	end
 end
+require 'timing'
 
 
 class Side
@@ -198,25 +190,26 @@ class Duel
 	end
 
 	def run_timing
-		if @timing
-			if @timing.class.leave_proc
-				self.instance_eval &(@timing.class.leave_proc)
-			end
-		else
+		if not @timing
 			if Timing.debug
 				puts "First Timing"
 			end
 		end
 		@timing = @next_timing
+		@td = @next_timing_data
 		@next_timing = nil
 		if Timing.debug
 			puts "enter #{@timing.class.to_s}"
 		end
 		self.instance_eval &(@timing.class.enter_proc)
+		if @timing.class.leave_proc
+			self.instance_eval &(@timing.class.leave_proc)
+		end
 	end
 
-	def goto(new_timing)
+	def goto(new_timing, args)
 		self.next_timing = new_timing
+		@next_timing_data = args
 	end
 
 	def initialize(p1, p2)
@@ -234,8 +227,8 @@ class Duel
 		result
 	end
 
-	def start
-		self.next_timing = :prepare_game
+	def start(start_timing = :prepare_game)
+		self.next_timing = start_timing
 		while true
 			self.run_timing
 			if not @next_timing
