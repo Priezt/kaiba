@@ -125,7 +125,7 @@ class << Timing
 	end
 end
 class Timing
-	self.debug = false
+	self.debug = true
 
 	attr_accessor :timing_data
 end
@@ -211,6 +211,17 @@ class Duel
 	attr_accessor :phase
 	attr_accessor :turn_count
 	attr_accessor :first_player
+
+	def switch_player
+		sorted_player_names = self.players.collect do |p|
+			p.to_s
+		end.sort.to_a
+		next_index = 1 + (sorted_player_names.find_index @turn_player.to_s)
+		if next_index >= sorted_player_names.length
+			next_index = 0
+		end
+		@turn_player = self.players[sorted_player_names[next_index]]
+	end
 
 	def run_timing
 		@current_timing = @timing_stack.pop

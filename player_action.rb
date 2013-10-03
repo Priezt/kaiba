@@ -1,6 +1,8 @@
 class Player
-	def draw_card
-		side.zone["hand"].push side.zone["deck"].pop
+	def draw_card(count=1)
+		count.times do
+			side.zone["hand"].push side.zone["deck"].pop
+		end
 	end
 
 	def put_deck

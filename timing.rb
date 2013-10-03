@@ -6,9 +6,9 @@ class Timing
 			p.put_deck
 			p.shuffle_deck
 			p.regenerate_life_point
+			p.draw_card 5
 		end
-		#goto :start_game
-		goto :dump_game
+		goto :start_game
 	end
 
 	create :dump_game do
@@ -18,6 +18,13 @@ class Timing
 	create :start_game do
 		@turn_count = 1
 		@phase = :draw
+		goto :enter_turn
+	end
+
+	create :enter_turn do
+		@turn_count += 1
+		self.switch_player
+		goto :phase_draw
 	end
 
 	create :test_pass_args do
@@ -43,3 +50,4 @@ class Timing
 		end
 	end
 end
+require 'phase'
