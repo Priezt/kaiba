@@ -2,7 +2,13 @@ class Timing
 	create :prepare_game do
 		@first_player = players.values.sort_by{|p| p.to_s}.first
 		@turn_count = 0
-		goto :start_game
+		@players.each_value do |p|
+			p.put_deck
+			p.shuffle_deck
+			p.regenerate_life_point
+		end
+		#goto :start_game
+		goto :dump_game
 	end
 
 	create :dump_game do

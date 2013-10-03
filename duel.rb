@@ -69,6 +69,10 @@ class Card
 	def to_s
 		@name
 	end
+
+	def clone
+		Card[self.class.to_s.sub(/.*:/, "")]
+	end
 end
 require 'card'
 
@@ -76,6 +80,7 @@ class Player
 	include NameToString
 	attr_accessor :deck
 	attr_accessor :life_point
+	attr_accessor :side
 
 	def initialize(name)
 		@name = name
@@ -85,10 +90,12 @@ class Player
 	def dump
 		result = ""
 		result += "#{@name}\n"
-		result += deck.dump
+		#result += deck.dump
+		result += side.dump
 		result
 	end
 end
+require 'player_action'
 
 class Timing; end
 class << Timing
@@ -119,16 +126,19 @@ class << Timing
 end
 class Timing
 	self.debug = false
+
+	attr_accessor :timing_data
 end
 require 'timing'
 
-
 class Side
 	bucket :zones
+	alias zone zones
 	attr_accessor :player
 
 	def initialize(p)
 		self.player = p
+		p.side = self
 		zones << Zone.new("deck")
 		zones << Zone.new("extra")
 		zones << Zone.new("hand")
@@ -174,42 +184,62 @@ class Zone
 	def dump
 		"#{@name}(#{self.cards.count})"
 	end
+
+	def pop
+		self.cards.pop
+	end
+
+	def push(c)
+		self.cards.push c
+	end
+
+	def clear
+		self.cards = []
+	end
+
+	def shuffle
+		@cards = @cards.sort_by do |c|
+			rand
+		end
+	end
 end
 
 class Duel
 	bucket :players
 	attr_accessor :board
-	attr_reader :timing
 	attr_accessor :turn_player
 	attr_accessor :phase
 	attr_accessor :turn_count
 	attr_accessor :first_player
 
-	def next_timing=(new_timing)
-		@next_timing = eval "Timing::#{new_timing.to_s.camel}.new"
-	end
-
 	def run_timing
-		if not @timing
-			if Timing.debug
-				puts "First Timing"
-			end
-		end
-		@timing = @next_timing
-		@td = @next_timing_data
-		@next_timing = nil
+		@current_timing = @timing_stack.pop
+		@td = @current_timing.timing_data
 		if Timing.debug
-			puts "enter #{@timing.class.to_s}"
+			puts "enter #{@current_timing.class.to_s}"
 		end
-		self.instance_eval &(@timing.class.enter_proc)
-		if @timing.class.leave_proc
-			self.instance_eval &(@timing.class.leave_proc)
+		self.instance_eval &(@current_timing.class.enter_proc)
+		if @current_timing.class.leave_proc
+			self.instance_eval &(@current_timing.class.leave_proc)
 		end
 	end
 
-	def goto(new_timing, args)
-		self.next_timing = new_timing
-		@next_timing_data = args
+	def clear_timing_stack
+		@timing_stack = []
+	end
+
+	def push_timing(new_timing_symbol, args={})
+		@timing_stack ||= []
+		new_timing = eval "Timing::#{new_timing_symbol.to_s.camel}.new"
+		new_timing.timing_data = args
+		@timing_stack.push new_timing
+	end
+
+	alias goto push_timing
+
+	def set_timing(new_timing_symbol, args)
+		self.clear_timing_stack
+		self.push_timing new_timing_symbol, args
 	end
 
 	def initialize(p1, p2)
@@ -228,12 +258,9 @@ class Duel
 	end
 
 	def start(start_timing = :prepare_game)
-		self.next_timing = start_timing
-		while true
+		self.push_timing start_timing
+		while @timing_stack.length > 0
 			self.run_timing
-			if not @next_timing
-				break
-			end
 		end
 	end
 end

@@ -7,6 +7,7 @@ class Card
 		attack 2000
 		defend 100
 	end
+
 	class GeneticWolfV < Card
 		name "Genetic Wolf V"
 		type :monster

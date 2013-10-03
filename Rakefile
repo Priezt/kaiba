@@ -7,9 +7,14 @@ if ENV['DEBUG']
 end
 
 duel = Duel.new Player.new("Kaiba"), Player.new("Yugi")
-duel.players["Kaiba"].deck = Deck.new do
-	40.times do
-		@main_deck << Card[:GeneticWolf]
+["Kaiba", "Yugi"].each do |p|
+	duel.players[p].deck = Deck.new do
+		20.times do
+			@main_deck << Card[:GeneticWolf]
+		end
+		20.times do
+			@main_deck << Card[:GeneticWolfV]
+		end
 	end
 end
 
@@ -17,11 +22,12 @@ task :default => [:test]
 
 desc "Common Test"
 task :test do
-	puts d.dump
+	duel.start
 end
 
 task :timing do
-	duel.start :test_create_timing
+	#duel.start :test_create_timing
+	duel.start :test_pass_args
 end
 
 task :duel do
@@ -35,5 +41,8 @@ task :card do
 end
 
 task :player do
+	duel.players["Kaiba"].put_deck
+	duel.players["Kaiba"].shuffle_deck
+	duel.players["Kaiba"].draw_card
 	puts duel.players["Kaiba"].dump
 end
