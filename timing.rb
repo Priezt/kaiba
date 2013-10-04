@@ -1,7 +1,7 @@
 class Timing
 	create :after_timing do
-		Timing.timing_hooks.each do |timing_proc|
-			timing_proc.call self
+		self.timing_hooks.each do |timing_proc|
+			timing_proc.call
 		end
 	end
 
@@ -44,6 +44,10 @@ class Timing
 
 	create :end_pass_args do
 		p @td
+	end
+
+	create :quit do
+		clear_timing_stack
 	end
 
 	create_raw :test_create_timing do

@@ -1,6 +1,5 @@
 require 'duel'
-require 'irb'
-require 'irb/completion'
+require 'duel_console'
 
 if ENV['DEBUG']
 	Timing.debug = true
@@ -26,8 +25,8 @@ task :test do
 end
 
 task :timing do
-	Timing.add_timing_hook proc{ |d|
-		puts "hook:#{d}"
+	duel.add_timing_hook proc{
+		puts "hook:#{duel}"
 	}
 	duel.start
 end
@@ -47,4 +46,10 @@ task :player do
 	duel.players["Kaiba"].shuffle_deck
 	duel.players["Kaiba"].draw_card
 	puts duel.players["Kaiba"].dump
+end
+
+desc "Duel Console"
+task :duel_console do
+	dc = DuelConsole.new duel
+	dc.start
 end

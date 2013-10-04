@@ -103,15 +103,6 @@ class << Timing
 	attr_accessor :enter_proc
 	attr_accessor :leave_proc
 
-	def add_timing_hook(hook_proc)
-		@timing_hooks ||= []
-		@timing_hooks << hook_proc
-	end
-
-	def timing_hooks
-		@timing_hooks ||= []
-	end
-
 	def create(classname, &block)
 		create_raw(classname) do
 			enter &block
@@ -221,6 +212,15 @@ class Duel
 	attr_accessor :turn_count
 	attr_accessor :first_player
 
+	def add_timing_hook(hook_proc)
+		@timing_hooks ||= []
+		@timing_hooks << hook_proc
+	end
+
+	def timing_hooks
+		@timing_hooks ||= []
+	end
+
 	def switch_player
 		sorted_player_names = self.players.collect do |p|
 			p.to_s
@@ -285,5 +285,10 @@ class Duel
 		while @timing_stack.length > 0
 			self.run_timing
 		end
+	end
+
+	def end?
+		@timing_stack ||= []
+		@timing_stack.length == 0
 	end
 end
