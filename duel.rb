@@ -212,6 +212,17 @@ class Duel
 	attr_accessor :turn_count
 	attr_accessor :first_player
 
+	def opponent_player
+		self.players.each_value do |p|
+			if p != self.turn_player
+				p
+			end
+		end
+	end
+
+	alias ore turn_player
+	alias omae opponent_player
+
 	def add_timing_hook(hook_proc)
 		@timing_hooks ||= []
 		@timing_hooks << hook_proc
@@ -253,12 +264,32 @@ class Duel
 
 	def push_timing(new_timing_symbol, args={})
 		@timing_stack ||= []
+		if not eval("defined?(Timing::#{new_timing_symbol.to_s.camel})")
+			Timing.class_eval do
+				create new_timing_symbol do
+				end
+			end
+		end
 		new_timing = eval "Timing::#{new_timing_symbol.to_s.camel}.new"
 		new_timing.timing_data = args
 		@timing_stack.push new_timing
 	end
 
 	alias goto push_timing
+
+	def push_multiple_timing(*new_timing_symbol_list)
+		new_timing_symbol_list.reverse.each do |t|
+			if t.class == Symbol
+				goto t
+			elsif t.class == Array
+				goto *t
+			else
+				raise Exception.new "unexpected class"
+			end
+		end
+	end
+
+	alias stack push_multiple_timing
 
 	def set_timing(new_timing_symbol, args)
 		self.clear_timing_stack
@@ -290,5 +321,11 @@ class Duel
 	def end?
 		@timing_stack ||= []
 		@timing_stack.length == 0
+	end
+
+	def log(msg)
+		File.open(",duel.log", "a") do |f|
+			f.puts msg
+		end
 	end
 end

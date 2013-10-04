@@ -59,5 +59,10 @@ class Timing
 			puts "Leave Timing"
 		end
 	end
+
+	create :draw_card do
+		log "ore.draw_card"
+		ore.draw_card
+	end
 end
 require 'phase'
