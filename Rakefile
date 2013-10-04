@@ -26,8 +26,10 @@ task :test do
 end
 
 task :timing do
-	#duel.start :test_create_timing
-	duel.start :test_pass_args
+	Timing.add_timing_hook proc{ |d|
+		puts "hook:#{d}"
+	}
+	duel.start
 end
 
 task :duel do

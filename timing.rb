@@ -1,4 +1,10 @@
 class Timing
+	create :after_timing do
+		Timing.timing_hooks.each do |timing_proc|
+			timing_proc.call self
+		end
+	end
+
 	create :prepare_game do
 		@first_player = players.values.sort_by{|p| p.to_s}.first
 		@turn_count = 0

@@ -103,6 +103,15 @@ class << Timing
 	attr_accessor :enter_proc
 	attr_accessor :leave_proc
 
+	def add_timing_hook(hook_proc)
+		@timing_hooks ||= []
+		@timing_hooks << hook_proc
+	end
+
+	def timing_hooks
+		@timing_hooks ||= []
+	end
+
 	def create(classname, &block)
 		create_raw(classname) do
 			enter &block
@@ -125,7 +134,7 @@ class << Timing
 	end
 end
 class Timing
-	self.debug = true
+	self.debug = false
 
 	attr_accessor :timing_data
 end
@@ -233,6 +242,9 @@ class Duel
 		if @current_timing.class.leave_proc
 			self.instance_eval &(@current_timing.class.leave_proc)
 		end
+		after_timing = Timing::AfterTiming.new
+		after_timing.timing_data = @current_timing
+		self.instance_eval &(after_timing.class.enter_proc)
 	end
 
 	def clear_timing_stack
