@@ -1,5 +1,14 @@
 require 'tools'
 
+class Command
+	attr_accessor :type, :data
+
+	def initialize(type, args)
+		@type = type
+		@data = args
+	end
+end
+
 class Deck
 	attr_accessor :main_deck
 	attr_accessor :extra_deck
@@ -81,6 +90,7 @@ class Player
 	attr_accessor :deck
 	attr_accessor :life_point
 	attr_accessor :side
+	attr_accessor :normal_summon_allowed_count
 
 	def initialize(name)
 		@name = name
@@ -222,6 +232,8 @@ class Duel
 
 	alias ore turn_player
 	alias omae opponent_player
+	alias me turn_player
+	alias you opponent_player
 
 	def add_timing_hook(hook_proc)
 		@timing_hooks ||= []
