@@ -23,4 +23,14 @@ class Player
 	def regenerate_life_point
 		@life_point = 8000
 	end
+
+	def normal_summon_commands
+		if normal_summon_allowed_count <= 0
+			return []
+		end
+		tp.hand_zone.cards.select do |c|
+			c.can_normal_summon?
+		end
+	end
 end
+

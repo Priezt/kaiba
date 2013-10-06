@@ -30,7 +30,7 @@ class Timing
 	create :enter_turn do
 		@turn_count += 1
 		self.switch_player
-		me.normal_summon_allowed_count = 1
+		tp.normal_summon_allowed_count = 1
 		goto :phase_draw
 	end
 
@@ -62,8 +62,16 @@ class Timing
 	end
 
 	create :draw_card do
-		log "ore.draw_card"
-		ore.draw_card
+		log "tp.draw_card"
+		tp.draw_card
+	end
+
+	create :free_main_phase_1 do
+		all_available_commands = []
+		log tp.monster_zones
+		all_available_commands << Commands.new(tp, :enter_battle)
+		all_available_commands << Commands.new(tp, :turn_end)
+		all_available_commands << tp.normal_summon_commands
 	end
 end
 require 'phase'

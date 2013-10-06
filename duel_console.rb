@@ -56,9 +56,9 @@ class DuelConsole
 			clear
 			draw_timing
 			draw_center_line
-			draw_x
 			draw_last_key
 			draw_zones
+			draw_x
 			refresh
 			process_input_key getch
 		end
@@ -179,6 +179,6 @@ class DuelConsole
 	end
 
 	def draw_x
-		str @row_count - 1, @col_count - 1, "x"
+		str @row_count - 1, @col_count - 1, "X"
 	end
 end

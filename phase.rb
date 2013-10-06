@@ -11,6 +11,7 @@ class Timing
 
 	create :phase_main1 do
 		@phase = :main1
+		goto :free_main_phase_1
 	end
 
 	create :phase_battle do

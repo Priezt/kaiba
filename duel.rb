@@ -1,9 +1,10 @@
 require 'tools'
 
 class Command
-	attr_accessor :type, :data
+	attr_accessor :player, :type, :data
 
-	def initialize(type, args)
+	def initialize(player, type, args={})
+		@player = player
 		@type = type
 		@data = args
 	end
@@ -82,6 +83,10 @@ class Card
 	def clone
 		Card[self.class.to_s.sub(/.*:/, "")]
 	end
+
+	def method_missing(method_name, *args, &block)
+		self.class.send method_name, *args, &block
+	end
 end
 require 'card'
 
@@ -91,6 +96,29 @@ class Player
 	attr_accessor :life_point
 	attr_accessor :side
 	attr_accessor :normal_summon_allowed_count
+
+	[
+		'deck',
+		'extra',
+		'hand',
+		'graveyard',
+		'field',
+		'remove',
+	].each do |z|
+		define_method "#{z}_zone" do
+			side.zones[z]
+		end
+	end
+	[
+		'monster',
+		'spell',
+	].each do |z|
+		define_method "#{z}_zones" do
+			(1..5).to_a.map do |n|
+				side.zones["#{z}:#{n}"]
+			end
+		end
+	end
 
 	def initialize(name)
 		@name = name
@@ -230,10 +258,8 @@ class Duel
 		end
 	end
 
-	alias ore turn_player
-	alias omae opponent_player
-	alias me turn_player
-	alias you opponent_player
+	alias tp turn_player
+	alias op opponent_player
 
 	def add_timing_hook(hook_proc)
 		@timing_hooks ||= []
@@ -252,15 +278,14 @@ class Duel
 		if next_index >= sorted_player_names.length
 			next_index = 0
 		end
+		log "switch player to: #{sorted_player_names[next_index]}"
 		@turn_player = self.players[sorted_player_names[next_index]]
 	end
 
 	def run_timing
 		@current_timing = @timing_stack.pop
 		@td = @current_timing.timing_data
-		if Timing.debug
-			puts "enter #{@current_timing.class.to_s}"
-		end
+		log "enter #{@current_timing.class.to_s}"
 		self.instance_eval &(@current_timing.class.enter_proc)
 		if @current_timing.class.leave_proc
 			self.instance_eval &(@current_timing.class.leave_proc)
@@ -328,6 +353,7 @@ class Duel
 		while @timing_stack.length > 0
 			self.run_timing
 		end
+		log "no timing left"
 	end
 
 	def end?
