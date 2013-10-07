@@ -11,7 +11,14 @@ class Timing
 
 	create :phase_main1 do
 		@phase = :main1
-		goto :free_main_phase_1
+		all_available_commands = []
+		stack [
+			:main_phase_common,
+			{:all_available_commands => all_available_commands}
+		], [
+			:free_main_phase_1,
+			{:all_available_commands => all_available_commands}
+		]
 	end
 
 	create :phase_battle do

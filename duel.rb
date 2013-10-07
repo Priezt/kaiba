@@ -1,4 +1,4 @@
-require 'tools'
+require './tools'
 
 class Command
 	attr_accessor :player, :type, :data
@@ -7,6 +7,14 @@ class Command
 		@player = player
 		@type = type
 		@data = args
+	end
+
+	def to_s
+		"#{@player}:#{@type}{#{
+			@data.each_key.map{|k|
+				"#{k}=>#{@data[k].to_s}"
+			}.join ","
+		}}"
 	end
 end
 
@@ -36,40 +44,45 @@ class Deck
 end
 
 class Card
-	def self.properties
-		[
-			:name,
-			:type,
-			:sub_type,
-			:level,
-			:attack,
-			:defend,
-			:text,
-			:rank,
-		]
+	def inherited(base)
+		# TODO:  inherit properties
+		# @properties ||= superclass.class_eval{@properties}
 	end
-
-	module PropertyMethods
-		Card.properties.each do |p|
-			define_method p do |*args|
-				if args.length == 0
-					eval "@#{p.to_s}"
-				else
-					eval "@#{p.to_s} = args[0]"
-				end
+end
+class << Card
+	def add_prop(sym)
+		@properties ||= []
+		@properties << sym
+		define_method sym do |*args|
+			if args.length == 0
+				eval "@#{sym.to_s}"
+			else
+				eval "@#{sym.to_s} = args[0]"
+			end
+		end
+		define_singleton_method sym do |*args|
+			if args.length == 0
+				eval "@#{sym.to_s}"
+			else
+				eval "@#{sym.to_s} = args[0]"
 			end
 		end
 	end
+end
+class Card
+	attr_accessor :duel
+	attr_accessor :player
+
+	add_prop :name
+	add_prop :text
 
 	def self.[](card_name)
 		eval("Card::#{card_name.to_s}").new
 	end
 
-	extend Card::PropertyMethods
-	include Card::PropertyMethods
-
 	def initialize
-		self.class.properties.each do |p|
+		p self.class
+		self.class.class_eval{@properties}.each do |p|
 			self.send p, (self.class.send p)
 		end
 		@face = :down
@@ -87,11 +100,16 @@ class Card
 	def method_missing(method_name, *args, &block)
 		self.class.send method_name, *args, &block
 	end
+
+	include DuelLog
+	extend DuelLog
 end
-require 'card'
+require './card_common'
+require './card'
 
 class Player
 	include NameToString
+	attr_accessor :duel
 	attr_accessor :deck
 	attr_accessor :life_point
 	attr_accessor :side
@@ -132,8 +150,11 @@ class Player
 		result += side.dump
 		result
 	end
+
+	include DuelLog
+	extend DuelLog
 end
-require 'player_action'
+require './player_action'
 
 class Timing; end
 class << Timing
@@ -166,8 +187,12 @@ class Timing
 	self.debug = false
 
 	attr_accessor :timing_data
+
+	def is(sym)
+		self.class.to_s.sub(/.*\:/, "") == sym.to_s.camel
+	end
 end
-require 'timing'
+require './timing'
 
 class Side
 	bucket :zones
@@ -240,6 +265,10 @@ class Zone
 			rand
 		end
 	end
+
+	def available?
+		cards.length == 0
+	end
 end
 
 class Duel
@@ -249,6 +278,7 @@ class Duel
 	attr_accessor :phase
 	attr_accessor :turn_count
 	attr_accessor :first_player
+	attr_accessor :current_timing
 
 	def opponent_player
 		self.players.each_value do |p|
@@ -336,6 +366,8 @@ class Duel
 	def initialize(p1, p2)
 		self.players << p1
 		self.players << p2
+		p1.duel = self
+		p2.duel = self
 		self.board = Board.new
 		self.board.add_side p1
 		self.board.add_side p2
@@ -361,9 +393,5 @@ class Duel
 		@timing_stack.length == 0
 	end
 
-	def log(msg)
-		File.open(",duel.log", "a") do |f|
-			f.puts msg
-		end
-	end
+	include DuelLog
 end

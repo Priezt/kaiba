@@ -1,5 +1,5 @@
-require 'duel'
-require 'duel_console'
+require './duel'
+require './duel_console'
 
 if ENV['DEBUG']
 	Timing.debug = true
@@ -11,8 +11,11 @@ duel = Duel.new Player.new("Kaiba"), Player.new("Yugi")
 		20.times do
 			@main_deck << Card[:GeneticWolf]
 		end
-		20.times do
+		10.times do
 			@main_deck << Card[:GeneticWolfV]
+		end
+		10.times do
+			@main_deck << Card[:Fusion]
 		end
 	end
 end

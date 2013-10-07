@@ -1,3 +1,11 @@
+module DuelLog
+	def log(msg)
+		File.open(",duel.log", "a") do |f|
+			f.puts msg
+		end
+	end
+end
+
 class String
 	def camel
 		self.split("_").map{|s| s.capitalize}.join ""
