@@ -23,7 +23,6 @@ class Timing
 
 	create :start_game do
 		@turn_count = 1
-		@phase = :draw
 		goto :enter_turn
 	end
 
@@ -31,7 +30,7 @@ class Timing
 		@turn_count += 1
 		self.switch_player
 		tp.normal_summon_allowed_count = 1
-		goto :phase_draw
+		goto :enter_phase_draw
 	end
 
 	create :test_pass_args do
@@ -64,21 +63,6 @@ class Timing
 	create :draw_card do
 		log "tp.draw_card"
 		tp.draw_card
-	end
-
-	create :main_phase_common do
-		all_available_commands = @td[:all_available_commands]
-		all_available_commands << Command.new(tp, :turn_end)
-		all_available_commands += tp.get_all_card_commands
-		all_available_commands += op.get_all_card_commands
-	end
-
-	create :free_main_phase_1 do
-		all_available_commands = @td[:all_available_commands]
-		all_available_commands << Command.new(tp, :enter_battle)
-		log "[#{all_available_commands.map do |c|
-			c.to_s
-		end.join ", "}]"
 	end
 end
 require './phase'

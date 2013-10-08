@@ -7,7 +7,7 @@ class Card
 		false
 	end
 
-	def get_all_card_commands
+	def get_commands
 		[]
 	end
 end

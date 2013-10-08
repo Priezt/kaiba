@@ -39,9 +39,11 @@ task :duel do
 end
 
 task :card do
-	p Card::GeneticWolf.new
-	p Card::GeneticWolf.attack
-	p Card['GeneticWolf'].attack
+	p Card.properties
+	p MonsterCard.properties
+	p NormalMonsterCard.properties
+	p Card::GeneticWolf.properties
+	p Card::GeneticWolf.new.attack
 end
 
 task :player do

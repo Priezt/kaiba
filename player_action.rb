@@ -10,12 +10,12 @@ class Player
 			"deck" => "main_deck",
 			"extra" => "extra_deck",
 		}.each_pair do |k, v|
-			side.zone[z].clear
+			side.zone[k].clear
 			@deck.send(v).each do |c|
 				card_instance = c.clone
 				card_instance.duel = @duel
 				card_instance.player = self
-				side.zone[z].push card_instance
+				side.zone[k].push card_instance
 			end
 		end
 	end

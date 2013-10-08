@@ -44,12 +44,18 @@ class Deck
 end
 
 class Card
-	def inherited(base)
+	def self.inherited(base)
 		# TODO:  inherit properties
 		# @properties ||= superclass.class_eval{@properties}
+		ancstrs = base.ancestors.clone
+		ancstrs.shift
+		base.properties ||= []
+		base.properties += ancstrs.find{|c| c.to_s =~ /Card$/}.properties
 	end
 end
 class << Card
+	attr_accessor :properties
+
 	def add_prop(sym)
 		@properties ||= []
 		@properties << sym
@@ -81,8 +87,7 @@ class Card
 	end
 
 	def initialize
-		p self.class
-		self.class.class_eval{@properties}.each do |p|
+		self.class.properties.each do |p|
 			self.send p, (self.class.send p)
 		end
 		@face = :down
@@ -275,7 +280,6 @@ class Duel
 	bucket :players
 	attr_accessor :board
 	attr_accessor :turn_player
-	attr_accessor :phase
 	attr_accessor :turn_count
 	attr_accessor :first_player
 	attr_accessor :current_timing
@@ -283,7 +287,7 @@ class Duel
 	def opponent_player
 		self.players.each_value do |p|
 			if p != self.turn_player
-				p
+				return p
 			end
 		end
 	end
@@ -391,6 +395,12 @@ class Duel
 	def end?
 		@timing_stack ||= []
 		@timing_stack.length == 0
+	end
+
+	def under(timing_sym)
+		([@current_timing] + @timing_stack).find do |t|
+			t.class.to_s.sub(/.*\:/, '') == timing_sym.to_s.camel
+		end
 	end
 
 	include DuelLog
