@@ -28,24 +28,10 @@ class Player
 		@life_point = 8000
 	end
 
-	def normal_summon_commands
-		if normal_summon_allowed_count <= 0
-			return []
-		end
-		if monster_zones.select{|z| z.available?}.length == 0
-			return []
-		end
-		hand_zone.cards.select do |c|
-			c.can_normal_summon?
-		end.map do |c|
-			Command.new self, :normal_summon, :card => c
-		end
-	end
-
 	def get_all_card_commands
 		commands = []
 		all_my_cards.each do |c|
-			c.get_commands
+			commands += c.get_commands
 		end
 		commands
 	end
@@ -65,6 +51,19 @@ class Player
 			all_cards += z.cards
 		end
 		all_cards
+	end
+
+	include GetCommands
+
+	def at_totally_free
+		commands = []
+		if @duel.turn_player == self
+			commands << Command.new(self, :turn_end)
+			if @duel.under :phase_main1
+				commands << Command.new(self, :enter_battle)
+			end
+		end
+		commands
 	end
 end
 

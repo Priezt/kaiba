@@ -13,26 +13,10 @@ class Timing
 	end
 
 	create :enter_phase_main1 do
-		stack :phase_main1,
+		stack [:totally_free, {:priority_player => tp}],
+			:phase_main1,
 			:phase_main,
 			:enter_phase_battle
-		all_available_commands = []
-		all_available_commands << Command.new(tp, :turn_end)
-		all_available_commands << Command.new(tp, :enter_battle)
-		all_available_commands += tp.get_all_card_commands
-		all_available_commands += op.get_all_card_commands
-		log "[#{all_available_commands.map do |c|
-			c.to_s
-		end.join ", "}]"
-		goto :quit
-	end
-
-	create :free_main_phase_1 do
-		all_available_commands = @td[:all_available_commands]
-		all_available_commands << Command.new(tp, :enter_battle)
-		log "[#{all_available_commands.map do |c|
-			c.to_s
-		end.join ", "}]"
 	end
 
 	create :enter_phase_battle do

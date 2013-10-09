@@ -64,5 +64,10 @@ class Timing
 		log "tp.draw_card"
 		tp.draw_card
 	end
+
+	create :totally_free do
+		commands = self.get_all_commands
+		goto :quit
+	end
 end
 require './phase'

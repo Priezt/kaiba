@@ -1,3 +1,14 @@
+module GetCommands
+	def get_commands
+		commands = []
+		method_name = "at_#{@duel.current_timing.class.to_s.sub(/.*\:/, "").gsub(/([A-Z])/, "_\\1").sub(/^_/, '').downcase}"
+		if self.respond_to? method_name
+			commands += self.send(method_name)
+		end
+		commands
+	end
+end
+
 module DuelLog
 	def log(msg)
 		File.open(",duel.log", "a") do |f|

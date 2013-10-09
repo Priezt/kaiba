@@ -1,28 +1,64 @@
 class Card
-	def can_normal_summon?
-		@level and @level <= 4
-	end
-
-	def can_activate_now?
-		false
-	end
-
-	def get_commands
-		[]
-	end
+	include GetCommands
 end
 
 class SpellCard < Card
+end
+
+class TrapCard < Card
 end
 
 class MonsterCard < Card
 	add_prop :level
 	add_prop :attack
 	add_prop :defend
+
+	def at_totally_free
+		[Command.new(@player, :summon, :card => self)]
+	end
 end
 
 class NormalSpellCard < SpellCard
 end
 
+class QuickSpellCard < SpellCard
+end
+
+class RitualSpellCard < SpellCard
+end
+
+class ContinuousSpellCard < SpellCard
+end
+
+class FieldSpellCard < SpellCard
+end
+
+class EquipSpellCard < SpellCard
+end
+
+class NormalTrapCard < TrapCard
+end
+
+class ContinuousTrapCard < TrapCard
+end
+
+class CounterTrapCard < TrapCard
+end
+
 class NormalMonsterCard < MonsterCard
+end
+
+class EffectMonsterCard < MonsterCard
+end
+
+class RitualMonsterCard < MonsterCard
+end
+
+class FusionMonsterCard < MonsterCard
+end
+
+class SynchronMonsterCard < MonsterCard
+end
+
+class XyzMonsterCard < MonsterCard
 end
