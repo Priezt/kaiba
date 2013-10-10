@@ -78,6 +78,7 @@ end
 class Card
 	attr_accessor :duel
 	attr_accessor :player
+	attr_accessor :zone
 
 	add_prop :name
 	add_prop :text
@@ -254,11 +255,14 @@ class Zone
 	end
 
 	def pop
-		self.cards.pop
+		c = self.cards.pop
+		c.zone = nil
+		c
 	end
 
 	def push(c)
 		self.cards.push c
+		c.zone = self
 	end
 
 	def clear
@@ -283,6 +287,7 @@ class Duel
 	attr_accessor :turn_count
 	attr_accessor :first_player
 	attr_accessor :current_timing
+	attr_accessor :td
 
 	def opponent_player
 		self.players.each_value do |p|

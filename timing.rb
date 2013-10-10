@@ -30,6 +30,7 @@ class Timing
 		@turn_count += 1
 		self.switch_player
 		tp.normal_summon_allowed_count = 1
+		op.normal_summon_allowed_count = 0
 		goto :enter_phase_draw
 	end
 
