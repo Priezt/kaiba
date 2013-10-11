@@ -414,9 +414,6 @@ class Duel
 		commands += op.get_commands
 		commands += tp.get_all_card_commands
 		commands += op.get_all_card_commands
-		log "[#{commands.map do |c|
-			c.to_s
-		end.join ", "}]"
 		commands
 	end
 

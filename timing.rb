@@ -68,6 +68,14 @@ class Timing
 
 	create :totally_free do
 		commands = self.get_all_commands
+		goto :choose_command, :commands => commands
+	end
+
+	create :choose_command do
+		commands = @td[:commands]
+		log "[#{commands.map do |c|
+			c.to_s
+		end.join ", "}]"
 		goto :quit
 	end
 end

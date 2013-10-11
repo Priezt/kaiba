@@ -14,11 +14,11 @@ class MonsterCard < Card
 	add_prop :defend
 
 	def at_totally_free
-		return [] unless @duel.under :phase_main
-		return [] unless @player.normal_summon_allowed_count > 0
-		return [] unless @player == duel.td[:priority_player]
-		return [] unless self.level <= 4
-		return [] unless @zone.to_s == "hand"
+		return unless @duel.under :phase_main
+		return unless @player.normal_summon_allowed_count > 0
+		return unless @player == duel.td[:priority_player]
+		return unless self.level <= 4
+		return unless @zone.to_s == "hand"
 		[Command.new(@player, :summon, :card => self)]
 	end
 end
