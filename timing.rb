@@ -68,7 +68,7 @@ class Timing
 
 	create :totally_free do
 		commands = self.get_all_commands
-		goto :choose_command, :commands => commands
+		goto :choose_command, :commands => commands, :priority_player => @td[:priority_player]
 	end
 
 	create :choose_command do
@@ -76,7 +76,12 @@ class Timing
 		log "[#{commands.map do |c|
 			c.to_s
 		end.join ", "}]"
-		goto :quit
+		priority_player_force_commands = select_all_force_commands commands, @td[:priority_player]
+		if priority_player_force_commands.count > 0
+			command = choose_one_command priority_player_force_commands
+			# push run-command timing to stack, handle spell stack
+		else
+		end
 	end
 end
 require './phase'

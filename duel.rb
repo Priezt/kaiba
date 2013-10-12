@@ -305,8 +305,17 @@ class Duel
 		@timing_hooks << hook_proc
 	end
 
+	def add_choose_hook(hook_proc)
+		@choose_hooks ||= []
+		@choose_hooks << hook_proc
+	end
+
 	def timing_hooks
 		@timing_hooks ||= []
+	end
+
+	def choose_hooks
+		@choose_hooks ||= []
 	end
 
 	def switch_player
@@ -415,6 +424,33 @@ class Duel
 		commands += tp.get_all_card_commands
 		commands += op.get_all_card_commands
 		commands
+	end
+
+	def select_all_force_commands(commands, player)
+		commands.select  do |c|
+			c.player == player
+		end.select  do |c|
+			c.data[:force]
+		end
+	end
+
+	def choose_one_command(commands)
+		if commands.count == 0
+			raise Exception.new("no command to choose")
+		elsif commands.count == 1
+			return commands[0]
+		else
+			if self.choose_hooks.count == 0
+				raise Exception.new "no choose hook"
+			end
+			self.choose_hooks.each  do |ch|
+				choose_result = ch.call commands
+				if choose_result
+					return choose_result
+				end
+			end
+			raise Exception.new "no command has been chosen"
+		end
 	end
 
 	include DuelLog

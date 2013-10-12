@@ -101,6 +101,10 @@ class DuelConsole
 		end
 	end
 
+	def choose_one_command(commands)
+		commands[0]
+	end
+
 	def draw_one_zone(row, col, zone_name, player)
 		str row, col, "#{zone_name.upcase}(#{player.side.zone[zone_name].cards.length})"
 	end
