@@ -19,7 +19,7 @@ class MonsterCard < Card
 		return unless @player == duel.td[:priority_player]
 		return unless self.level <= 4
 		return unless @zone.to_s == "hand"
-		[Command.new(@player, :summon, :card => self)]
+		[Command.new(@player, :summon, :card => self, :optional => true)]
 	end
 end
 

@@ -17,6 +17,9 @@ class DuelConsole
 		@duel.add_timing_hook proc{
 			self.draw_duel
 		}
+		@duel.add_choose_hook proc{|commands|
+			self.choose_one_command commands
+		}
 		@last_key = nil
 		@player_side_map = {}
 		side = :left
@@ -102,6 +105,7 @@ class DuelConsole
 	end
 
 	def choose_one_command(commands)
+		log "choose first command"
 		commands[0]
 	end
 
@@ -185,4 +189,6 @@ class DuelConsole
 	def draw_x
 		str @row_count - 1, @col_count - 1, "X"
 	end
+
+	include DuelLog
 end

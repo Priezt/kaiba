@@ -1,22 +1,5 @@
 require './tools'
-
-class Command
-	attr_accessor :player, :type, :data
-
-	def initialize(player, type, args={})
-		@player = player
-		@type = type
-		@data = args
-	end
-
-	def to_s
-		"#{@player}:#{@type}{#{
-			@data.each_key.map{|k|
-				"#{k}=>#{@data[k].to_s}"
-			}.join ","
-		}}"
-	end
-end
+require './command'
 
 class Deck
 	attr_accessor :main_deck
@@ -155,6 +138,14 @@ class Player
 		#result += deck.dump
 		result += side.dump
 		result
+	end
+
+	def other_player
+		@duel.players.each_value do |p|
+			if p != self
+				return p
+			end
+		end
 	end
 
 	include DuelLog
@@ -427,6 +418,7 @@ class Duel
 	end
 
 	def select_all_force_commands(commands, player)
+		log "select all force commands for #{player}"
 		commands.select  do |c|
 			c.player == player
 		end.select  do |c|
@@ -434,18 +426,31 @@ class Duel
 		end
 	end
 
+	def select_all_optional_commands(commands, player)
+		log "select all optional commands for #{player}"
+		commands.select  do |c|
+			c.player == player
+		end.select  do |c|
+			c.data[:optional]
+		end
+	end
+
 	def choose_one_command(commands)
+		log "about to choose one command: #{commands.count} commands"
 		if commands.count == 0
 			raise Exception.new("no command to choose")
 		elsif commands.count == 1
+			log "command chosen: #{commands[0]}"
 			return commands[0]
 		else
 			if self.choose_hooks.count == 0
 				raise Exception.new "no choose hook"
 			end
 			self.choose_hooks.each  do |ch|
-				choose_result = ch.call commands
+				log "choose_hook: #{ch.inspect}"
+				choose_result = ch.call commands # this shit cannot be fired, don't know why
 				if choose_result
+					log "command chosen: #{choose_result}"
 					return choose_result
 				end
 			end
