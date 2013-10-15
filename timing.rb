@@ -74,7 +74,7 @@ class Timing
 	create :choose_command do
 		commands = @td[:commands]
 		if commands.count == 0
-			riase Exception.new "impossible: no commands to be chosen"
+			raise Exception.new "impossible: no commands to be chosen"
 		end
 		log "[#{commands.map do |c|
 			c.to_s
@@ -83,25 +83,25 @@ class Timing
 		if priority_player_force_commands.count > 0
 			command = choose_one_command priority_player_force_commands
 			command.execute
-			return
+			next
 		end
 		other_player_force_commands = select_all_force_commands commands, @td[:priority_player].other_player
 		if other_player_force_commands.count > 0
 			command = choose_one_command other_player_force_commands
 			command.execute
-			return
+			next
 		end
 		priority_player_optional_commands = select_all_optional_commands commands, @td[:priority_player]
 		if priority_player_optional_commands.count > 0
 			command = choose_one_command priority_player_optional_commands
 			command.send :execute
-			return
+			next
 		end
 		other_player_optional_commands = select_all_optional_commands commands, @td[:priority_player].other_player
 		if other_player_optional_commands.count > 0
 			command = choose_one_command other_player_optional_commands
 			command.execute
-			return
+			next
 		end
 		raise Exception.new "impossible: no force/optional commands chosen"
 	end

@@ -1,5 +1,6 @@
 require './duel'
 require './duel_console'
+require './interactive_console'
 
 if ENV['DEBUG']
 	Timing.debug = true
@@ -22,7 +23,7 @@ end
 
 task :default => [:test]
 
-desc "Common Test"
+desc "common test"
 task :test do
 	duel.start
 end
@@ -53,8 +54,14 @@ task :player do
 	puts duel.players["Kaiba"].dump
 end
 
-desc "Duel Console"
+desc "duel console"
 task :duel_console do
 	dc = DuelConsole.new duel
 	dc.start
+end
+
+desc "interactive console"
+task :interactive_console do
+	ic = InteractiveConsole.new duel
+	ic.start
 end
