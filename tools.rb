@@ -9,7 +9,7 @@ module GetCommands
 	end
 end
 
-module DuelLog
+class Object
 	def log(msg)
 		File.open(",duel.log", "a") do |f|
 			f.puts msg

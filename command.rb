@@ -18,7 +18,5 @@ class Command
 	def execute
 		log "execute command: #{self}"
 	end
-
-	include DuelLog
 end
 

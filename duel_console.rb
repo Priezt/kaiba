@@ -189,6 +189,4 @@ class DuelConsole
 	def draw_x
 		str @row_count - 1, @col_count - 1, "X"
 	end
-
-	include DuelLog
 end

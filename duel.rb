@@ -89,9 +89,6 @@ class Card
 	def method_missing(method_name, *args, &block)
 		self.class.send method_name, *args, &block
 	end
-
-	include DuelLog
-	extend DuelLog
 end
 require './card_common'
 require './card'
@@ -147,9 +144,6 @@ class Player
 			end
 		end
 	end
-
-	include DuelLog
-	extend DuelLog
 end
 require './player_action'
 
@@ -457,6 +451,4 @@ class Duel
 			raise Exception.new "no command has been chosen"
 		end
 	end
-
-	include DuelLog
 end
