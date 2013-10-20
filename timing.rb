@@ -94,7 +94,7 @@ class Timing
 		priority_player_optional_commands = select_all_optional_commands commands, @td[:priority_player]
 		if priority_player_optional_commands.count > 0
 			command = choose_one_command priority_player_optional_commands
-			command.send :execute
+			command.execute
 			next
 		end
 		other_player_optional_commands = select_all_optional_commands commands, @td[:priority_player].other_player
@@ -104,6 +104,28 @@ class Timing
 			next
 		end
 		raise Exception.new "impossible: no force/optional commands chosen"
+	end
+
+	create :normal_summon_monster do
+		goto :about_to_summon
+		goto :pick_summon_zone
+	end
+
+	create :advance_summon_monster do
+		release_left = @td[:card].release_cost
+		log "need #{release_left} monsters to release"
+		goto :about_to_summon
+		goto :pick_summon_zone
+		if release_left > 0
+			goto :pick_release, :summon_card => @td[:card], :release_left => release_left
+		end
+	end
+
+	create :pick_release do
+		release_left = @td[:release_left]
+		release_commands = self.get_all_commands
+		p release_commands
+		goto :quit
 	end
 end
 require './phase'

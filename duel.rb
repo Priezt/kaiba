@@ -1,5 +1,7 @@
 require './tools'
 require './command'
+require './card_common'
+require './card'
 
 class Deck
 	attr_accessor :main_deck
@@ -26,72 +28,6 @@ class Deck
 	end
 end
 
-class Card
-	def self.inherited(base)
-		# TODO:  inherit properties
-		# @properties ||= superclass.class_eval{@properties}
-		ancstrs = base.ancestors.clone
-		ancstrs.shift
-		base.properties ||= []
-		base.properties += ancstrs.find{|c| c.to_s =~ /Card$/}.properties
-	end
-end
-class << Card
-	attr_accessor :properties
-
-	def add_prop(sym)
-		@properties ||= []
-		@properties << sym
-		define_method sym do |*args|
-			if args.length == 0
-				eval "@#{sym.to_s}"
-			else
-				eval "@#{sym.to_s} = args[0]"
-			end
-		end
-		define_singleton_method sym do |*args|
-			if args.length == 0
-				eval "@#{sym.to_s}"
-			else
-				eval "@#{sym.to_s} = args[0]"
-			end
-		end
-	end
-end
-class Card
-	attr_accessor :duel
-	attr_accessor :player
-	attr_accessor :zone
-
-	add_prop :name
-	add_prop :text
-
-	def self.[](card_name)
-		eval("Card::#{card_name.to_s}").new
-	end
-
-	def initialize
-		self.class.properties.each do |p|
-			self.send p, (self.class.send p)
-		end
-		@face = :down
-		@position = :vertical
-	end
-
-	def to_s
-		@name
-	end
-
-	def clone
-		Card[self.class.to_s.sub(/.*:/, "")]
-	end
-
-	def method_missing(method_name, *args, &block)
-		self.class.send method_name, *args, &block
-	end
-end
-require './card_common'
-require './card'
 
 class Player
 	include NameToString
@@ -182,6 +118,10 @@ class Timing
 	def is(sym)
 		self.class.to_s.sub(/.*\:/, "") == sym.to_s.camel
 	end
+
+	def to_s
+		self.class.name.sub /.*:/, ''
+	end
 end
 require './timing'
 
@@ -202,6 +142,9 @@ class Side
 		(1..5).each do |n|
 			zones << Zone.new("monster:#{n}")
 			zones << Zone.new("spell:#{n}")
+		end
+		zones.each_value do |z|
+			z.side = self
 		end
 	end
 
@@ -229,6 +172,7 @@ end
 class Zone
 	include NameToString
 	attr_accessor :cards
+	attr_accessor :side
 
 	def initialize(name)
 		@name = name
@@ -313,6 +257,14 @@ class Duel
 		end
 		log "switch player to: #{sorted_player_names[next_index]}"
 		@turn_player = self.players[sorted_player_names[next_index]]
+	end
+
+	def dump_timing_stack
+		"[#{
+			@timing_stack.map do |t|
+				t.to_s
+			end.join ", "
+		}]"
 	end
 
 	def run_timing
@@ -450,5 +402,13 @@ class Duel
 			end
 			raise Exception.new "no command has been chosen"
 		end
+	end
+
+	def all_cards
+		cards = []
+		players.each_value do |p|
+			cards += p.all_my_cards
+		end
+		cards
 	end
 end

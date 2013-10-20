@@ -1,6 +1,10 @@
 class Command
 	attr_accessor :player, :type, :data
 
+	def duel
+		@player.duel
+	end
+
 	def initialize(player, type, args={})
 		@player = player
 		@type = type
@@ -17,6 +21,19 @@ class Command
 
 	def execute
 		log "execute command: #{self}"
+		send "execute_#{@type}"
+	end
+
+	def execute_summon
+		duel.goto :normal_summon_monster, :card => @data[:card]
+	end
+
+	def execute_advance_summon
+		duel.goto :advance_summon_monster, :card => @data[:card]
+	end
+
+	def execute_monster_set
+		duel.goto :normal_set_monster, :card => @data[:card]
 	end
 end
 
