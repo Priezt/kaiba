@@ -1,7 +1,7 @@
 module GetCommands
 	def get_commands
 		commands = []
-		method_name = "at_#{@duel.current_timing.class.to_s.sub(/.*\:/, "").gsub(/([A-Z])/, "_\\1").sub(/^_/, '').downcase}"
+		method_name = "at_#{@duel.current_timing.class.to_s.uncamel}"
 		if self.respond_to? method_name
 			commands += (self.send(method_name) || [])
 		end
@@ -20,6 +20,10 @@ end
 class String
 	def camel
 		self.split("_").map{|s| s.capitalize}.join ""
+	end
+
+	def uncamel
+		self.sub(/.*\:/, "").gsub(/([A-Z])/, "_\\1").sub(/^_/, '').downcase
 	end
 end
 

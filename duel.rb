@@ -2,6 +2,7 @@ require './tools'
 require './command'
 require './card_common'
 require './card'
+require './card_filter'
 
 class Deck
 	attr_accessor :main_deck
