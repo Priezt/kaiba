@@ -5,6 +5,14 @@ class Card
 		base.properties ||= []
 		base.properties += ancstrs.find{|c| c.to_s =~ /Card$/}.properties
 	end
+
+	def is(&block)
+		[self].only(&block).length > 0
+	end
+
+	def under(timing)
+		@duel.under timing
+	end
 end
 
 class << Card
@@ -79,6 +87,18 @@ class Card
 	def same_side(c)
 		self.zone.side == c.zone.side
 	end
+
+	def release_consume(target_card)
+		target_card.release_value self
+	end
+
+	def release_value(for_card)
+		if same_side(for_card) and in_zone(:monster)
+			1
+		else
+			0
+		end
+	end
 end
 
 class SpellCard < Card
@@ -93,17 +113,16 @@ class MonsterCard < Card
 	add_prop :defend
 
 	def at_pick_release
-		return unless in_zone :monster
+		return unless is{
+			monster
+		}
 		[
 			Command.new(@player, :release, :card => self, :optional => true),
 		]
 	end
 
 	def at_totally_free
-		return unless @duel.under :phase_main
-		return unless @player.normal_summon_allowed_count > 0
-		return unless @player == duel.td[:priority_player]
-		return unless in_zone :hand
+		return unless under(:phase_main) and @player.normal_summon_allowed_count > 0 and @player == duel.td[:priority_player] and is{ on :hand }
 		if self.level <= 4
 			[
 				Command.new(@player, :summon, :card => self, :optional => true),
@@ -119,18 +138,6 @@ class MonsterCard < Card
 					Command.new(@player, :advance_monster_set, :card => self, :optional => true),
 				]
 			end
-		end
-	end
-
-	def release_consume(target_card)
-		target_card.release_value self
-	end
-
-	def release_value(for_card)
-		if same_side(for_card) and in_zone(:monster)
-			1
-		else
-			0
 		end
 	end
 

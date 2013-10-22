@@ -1,4 +1,55 @@
 class Player
+	include NameToString
+	attr_accessor :duel
+	attr_accessor :deck
+	attr_accessor :life_point
+	attr_accessor :side
+	attr_accessor :normal_summon_allowed_count
+
+	[
+		'deck',
+		'extra',
+		'hand',
+		'graveyard',
+		'field',
+		'remove',
+	].each do |z|
+		define_method "#{z}_zone" do
+			side.zones[z]
+		end
+	end
+	[
+		'monster',
+		'spell',
+	].each do |z|
+		define_method "#{z}_zones" do
+			(1..5).to_a.map do |n|
+				side.zones["#{z}:#{n}"]
+			end
+		end
+	end
+
+	def initialize(name)
+		@name = name
+		@life_point = 8000
+	end
+
+	def dump
+		result = ""
+		result += "#{@name}\n"
+		#result += deck.dump
+		result += side.dump
+		result
+	end
+
+	def other_player
+		@duel.players.each_value do |p|
+			if p != self
+				return p
+			end
+		end
+	end
+
 	def draw_card(count=1)
 		count.times do
 			side.zone["hand"].push side.zone["deck"].pop
@@ -64,6 +115,9 @@ class Player
 			end
 		end
 		commands
+	end
+
+	def at_pick_summon_zone
 	end
 end
 

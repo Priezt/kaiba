@@ -69,6 +69,6 @@ end
 desc "card filter"
 task :card_filter do
 	p [1,2,3,4,5].map{|n| Card[:GeneticWolf]}.only{
-		spell
+		monster
 	}
 end

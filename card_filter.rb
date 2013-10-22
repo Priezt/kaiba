@@ -31,6 +31,12 @@ class CardFilter
 	card_type :continuous_trap
 	card_type :counter_trap
 
+	def on(place)
+		@cards = @cards.select do |c|
+			c.in_zone place
+		end
+	end
+
 	def result
 		@cards
 	end

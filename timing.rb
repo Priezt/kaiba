@@ -107,8 +107,9 @@ class Timing
 	end
 
 	create :normal_summon_monster do
+		goto :quit
 		goto :about_to_summon
-		goto :pick_summon_zone
+		goto :pick_summon_zone, :player => @td[:card].player
 	end
 
 	create :advance_summon_monster do
@@ -126,6 +127,10 @@ class Timing
 		release_commands = self.get_all_commands
 		p release_commands
 		goto :quit
+	end
+
+	create :pick_summon_zone do
+		commands = @td[:player].get_commands
 	end
 end
 require './phase'
