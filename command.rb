@@ -35,5 +35,12 @@ class Command
 	def execute_monster_set
 		duel.goto :normal_set_monster, :card => @data[:card]
 	end
+
+	def execute_pick_zone
+		picked_zone = @data[:zone]
+		duel.instance_eval do
+			@last_picked_zone = picked_zone
+		end
+	end
 end
 

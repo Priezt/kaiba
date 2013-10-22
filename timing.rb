@@ -97,6 +97,7 @@ class Timing
 			command.execute
 			next
 		end
+		raise "Impossible: only priority player optional commands choose available"
 		other_player_optional_commands = select_all_optional_commands commands, @td[:priority_player].other_player
 		if other_player_optional_commands.count > 0
 			command = choose_one_command other_player_optional_commands
@@ -131,6 +132,11 @@ class Timing
 
 	create :pick_summon_zone do
 		commands = @td[:player].get_commands
+		goto :choose_command, :commands => commands, :priority_player => @td[:player]
+	end
+
+	create :about_to_summon do
+		puts "#{@last_picked_zone}"
 	end
 end
 require './phase'

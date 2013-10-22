@@ -109,15 +109,20 @@ class Player
 	def at_totally_free
 		commands = []
 		if @duel.turn_player == self
-			commands << Command.new(self, :turn_end)
+			commands << Command.new(self, :turn_end, :optional => true)
 			if @duel.under :phase_main1
-				commands << Command.new(self, :enter_battle)
+				commands << Command.new(self, :enter_battle, :optional => true)
 			end
 		end
 		commands
 	end
 
 	def at_pick_summon_zone
+		monster_zones.select do |z|
+			z.empty?
+		end.map do |z|
+			Command.new self, :pick_zone, :zone => z, :force => true
+		end
 	end
 end
 

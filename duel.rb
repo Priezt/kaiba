@@ -4,6 +4,7 @@ require './card_common'
 require './card'
 require './card_filter'
 require './player'
+require './zone'
 
 class Deck
 	attr_accessor :main_deck
@@ -117,46 +118,6 @@ class Board
 	end
 end
 
-class Zone
-	include NameToString
-	attr_accessor :cards
-	attr_accessor :side
-
-	def initialize(name)
-		@name = name
-		self.cards ||= []
-	end
-
-	def dump
-		"#{@name}(#{self.cards.count})"
-	end
-
-	def pop
-		c = self.cards.pop
-		c.zone = nil
-		c
-	end
-
-	def push(c)
-		self.cards.push c
-		c.zone = self
-	end
-
-	def clear
-		self.cards = []
-	end
-
-	def shuffle
-		@cards = @cards.sort_by do |c|
-			rand
-		end
-	end
-
-	def available?
-		cards.length == 0
-	end
-end
-
 class Duel
 	bucket :players
 	attr_accessor :board
@@ -219,7 +180,7 @@ class Duel
 		@current_timing = @timing_stack.pop
 		@td = @current_timing.timing_data
 		log "enter #{@current_timing.class.to_s}"
-		self.instance_eval &(@current_timing.class.enter_proc)
+		@last_data = self.instance_eval &(@current_timing.class.enter_proc)
 		if @current_timing.class.leave_proc
 			self.instance_eval &(@current_timing.class.leave_proc)
 		end
