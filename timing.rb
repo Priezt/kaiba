@@ -1,3 +1,46 @@
+class Timing; end
+
+class << Timing
+	attr_accessor :debug
+	attr_accessor :enter_proc
+	attr_accessor :leave_proc
+
+	def create(classname, &block)
+		create_raw(classname) do
+			enter &block
+		end
+	end
+
+	def create_raw(classname, &block)
+		self.const_set classname.to_s.camel, Class.new(Timing){ }
+		if block
+			(self.const_get classname.to_s.camel).class_eval &block
+		end
+	end
+
+	def enter(&block)
+		@enter_proc = block
+	end
+
+	def leave(&block)
+		@leave_proc = block
+	end
+end
+
+class Timing
+	self.debug = false
+
+	attr_accessor :timing_data
+
+	def is(sym)
+		self.class.to_s.sub(/.*\:/, "") == sym.to_s.camel
+	end
+
+	def to_s
+		self.class.name.sub /.*:/, ''
+	end
+end
+
 class Timing
 	create :after_timing do
 		self.timing_hooks.each do |timing_proc|
@@ -137,6 +180,7 @@ class Timing
 
 	create :about_to_summon do
 		puts "#{@last_picked_zone}"
+		query_all_cards
 	end
 end
 require './phase'
