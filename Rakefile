@@ -2,10 +2,6 @@ require './duel'
 require './duel_console'
 require './interactive_console'
 
-if ENV['DEBUG']
-	Timing.debug = true
-end
-
 duel = Duel.new Player.new("Kaiba"), Player.new("Yugi")
 ["Kaiba", "Yugi"].each do |p|
 	duel.players[p].deck = Deck.new do

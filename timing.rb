@@ -1,7 +1,6 @@
 class Timing; end
 
 class << Timing
-	attr_accessor :debug
 	attr_accessor :enter_proc
 	attr_accessor :leave_proc
 
@@ -28,8 +27,6 @@ class << Timing
 end
 
 class Timing
-	self.debug = false
-
 	attr_accessor :timing_data
 
 	def is(sym)
@@ -42,10 +39,38 @@ class Timing
 end
 
 class Timing
+	create_raw :test_create_timing do
+		enter do
+			puts "Enter Timing"
+		end
+
+		leave do
+			puts "Leave Timing"
+		end
+	end
+
+	create :test_pass_args do
+		goto :test_pass_args_2, :a => 1, :b => 2
+	end
+
+	create :test_pass_args_2 do
+		p @td
+		goto :end_pass_args, :a => 3, :b => 4
+	end
+
+	create :end_pass_args do
+		p @td
+	end
+
+	# this one is special, it should not be invoke by #goto
 	create :after_timing do
 		self.timing_hooks.each do |timing_proc|
 			timing_proc.call
 		end
+	end
+
+	create :quit do
+		clear_timing_stack
 	end
 
 	create :prepare_game do
@@ -75,33 +100,6 @@ class Timing
 		tp.normal_summon_allowed_count = 1
 		op.normal_summon_allowed_count = 0
 		goto :enter_phase_draw
-	end
-
-	create :test_pass_args do
-		goto :test_pass_args_2, :a => 1, :b => 2
-	end
-
-	create :test_pass_args_2 do
-		p @td
-		goto :end_pass_args, :a => 3, :b => 4
-	end
-
-	create :end_pass_args do
-		p @td
-	end
-
-	create :quit do
-		clear_timing_stack
-	end
-
-	create_raw :test_create_timing do
-		enter do
-			puts "Enter Timing"
-		end
-
-		leave do
-			puts "Leave Timing"
-		end
 	end
 
 	create :draw_card do

@@ -50,6 +50,8 @@ class Player
 		end
 	end
 
+	alias :opponent :other_player
+
 	def draw_card(count=1)
 		count.times do
 			side.zone["hand"].push side.zone["deck"].pop

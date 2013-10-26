@@ -6,184 +6,37 @@ require './card_filter'
 require './player'
 require './zone'
 require './timing'
-
-class Deck
-	attr_accessor :main_deck
-	attr_accessor :extra_deck
-
-	def initialize(&block)
-		@main_deck ||= []
-		@extra_deck ||= []
-		if block
-			self.instance_eval &block
-		end
-	end
-
-	def dump
-		"Main: #{
-			@main_deck.collect do |c|
-				c.to_s
-			end.join ", "
-		}\nExtra: #{
-			@extra_deck.collect do |c|
-				c.to_s
-			end.join ", "
-		}\n"
-	end
-end
-
-
-class Side
-	bucket :zones
-	alias zone zones
-	attr_accessor :player
-
-	def initialize(p)
-		self.player = p
-		p.side = self
-		zones << Zone.new("deck")
-		zones << Zone.new("extra")
-		zones << Zone.new("hand")
-		zones << Zone.new("field")
-		zones << Zone.new("graveyard")
-		zones << Zone.new("remove")
-		(1..5).each do |n|
-			zones << Zone.new("monster:#{n}")
-			zones << Zone.new("spell:#{n}")
-		end
-		zones.each_value do |z|
-			z.side = self
-		end
-	end
-
-	def dump
-		"#{player}: " + (zones.collect do |z|
-			z.dump
-		end.join " ")
-	end
-end
-
-class Board
-	bucket :sides
-
-	def add_side(p)
-		self.sides << Side.new(p)
-	end
-
-	def dump
-		sides.collect do |s|
-			s.dump + "\n"
-		end.join ""
-	end
-end
+require './deck'
+require './side'
+require './board'
+require './hooks'
+require './duel_timing'
 
 class Duel
 	bucket :players
 	attr_accessor :board
-	attr_accessor :turn_player
 	attr_accessor :turn_count
+
+
 	attr_accessor :first_player
-	attr_accessor :current_timing
-	attr_accessor :td
+	attr_accessor :turn_player
+	attr_accessor :priority_player
+
+	def switch_priority
+		@priority_player = @priority_player.opponent
+		log "switch priority player to: #{@priority_player}"
+	end
 
 	def opponent_player
-		self.players.each_value do |p|
-			if p != self.turn_player
-				return p
-			end
-		end
+		self.turn_player.opponent
 	end
 
 	alias tp turn_player
 	alias op opponent_player
 
-	def add_timing_hook(hook_proc)
-		@timing_hooks ||= []
-		@timing_hooks << hook_proc
-	end
-
-	def add_choose_hook(hook_proc)
-		@choose_hooks ||= []
-		@choose_hooks << hook_proc
-	end
-
-	def timing_hooks
-		@timing_hooks ||= []
-	end
-
-	def choose_hooks
-		@choose_hooks ||= []
-	end
-
 	def switch_player
-		sorted_player_names = self.players.collect do |p|
-			p.to_s
-		end.sort.to_a
-		next_index = 1 + (sorted_player_names.find_index @turn_player.to_s)
-		if next_index >= sorted_player_names.length
-			next_index = 0
-		end
-		log "switch player to: #{sorted_player_names[next_index]}"
-		@turn_player = self.players[sorted_player_names[next_index]]
-	end
-
-	def dump_timing_stack
-		"[#{
-			@timing_stack.map do |t|
-				t.to_s
-			end.join ", "
-		}]"
-	end
-
-	def run_timing
-		@current_timing = @timing_stack.pop
-		@td = @current_timing.timing_data
-		log "enter #{@current_timing.class.to_s}"
-		@last_data = self.instance_eval &(@current_timing.class.enter_proc)
-		if @current_timing.class.leave_proc
-			self.instance_eval &(@current_timing.class.leave_proc)
-		end
-		after_timing = Timing::AfterTiming.new
-		after_timing.timing_data = @current_timing
-		self.instance_eval &(after_timing.class.enter_proc)
-	end
-
-	def clear_timing_stack
-		@timing_stack = []
-	end
-
-	def push_timing(new_timing_symbol, args={})
-		@timing_stack ||= []
-		if not eval("defined?(Timing::#{new_timing_symbol.to_s.camel})")
-			Timing.class_eval do
-				create new_timing_symbol do
-				end
-			end
-		end
-		new_timing = eval "Timing::#{new_timing_symbol.to_s.camel}.new"
-		new_timing.timing_data = args
-		@timing_stack.push new_timing
-	end
-
-	alias goto push_timing
-
-	def push_multiple_timing(*new_timing_symbol_list)
-		new_timing_symbol_list.reverse.each do |t|
-			if t.class == Symbol
-				goto t
-			elsif t.class == Array
-				goto *t
-			else
-				raise Exception.new "unexpected class"
-			end
-		end
-	end
-
-	alias stack push_multiple_timing
-
-	def set_timing(new_timing_symbol, args)
-		self.clear_timing_stack
-		self.push_timing new_timing_symbol, args
+		@turn_player = @turn_player.opponent
+		log "switch player to: #{@turn_player}"
 	end
 
 	def initialize(p1, p2)
@@ -201,25 +54,6 @@ class Duel
 		result = ""
 		result += self.board.dump
 		result
-	end
-
-	def start(start_timing = :prepare_game)
-		self.push_timing start_timing
-		while @timing_stack.length > 0
-			self.run_timing
-		end
-		log "no timing left"
-	end
-
-	def end?
-		@timing_stack ||= []
-		@timing_stack.length == 0
-	end
-
-	def under(timing_sym)
-		([@current_timing] + @timing_stack).find do |t|
-			t.class.to_s.sub(/.*\:/, '') == timing_sym.to_s.camel
-		end
 	end
 
 	def get_all_commands
@@ -280,12 +114,17 @@ class Duel
 		cards
 	end
 
+	def query_all_commands
+		[]
+	end
+
 	def query_all_cards
 		log "query all cards"
 		commands = get_all_commands
 		if commands.length > 0
 			goto :choose_command, :commands => commands, :priority_player => @td[:priority_player]
 		end
+		commands.length
 	end
 
 	def query_player(player)
