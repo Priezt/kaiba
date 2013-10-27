@@ -90,4 +90,8 @@ class Duel
 			end.join ", "
 		}]"
 	end
+
+	def choose_command(commands)
+		goto :choose_command, :commands => commands
+	end
 end

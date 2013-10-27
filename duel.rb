@@ -56,33 +56,6 @@ class Duel
 		result
 	end
 
-	def get_all_commands
-		commands = []
-		commands += tp.get_commands
-		commands += op.get_commands
-		commands += tp.get_all_card_commands
-		commands += op.get_all_card_commands
-		commands
-	end
-
-	def select_all_force_commands(commands, player)
-		log "select all force commands for #{player}"
-		commands.select  do |c|
-			c.player == player
-		end.select  do |c|
-			c.data[:force]
-		end
-	end
-
-	def select_all_optional_commands(commands, player)
-		log "select all optional commands for #{player}"
-		commands.select  do |c|
-			c.player == player
-		end.select  do |c|
-			c.data[:optional]
-		end
-	end
-
 	def choose_one_command(commands)
 		log "about to choose one command: #{commands.count} commands"
 		if commands.count == 0
@@ -115,23 +88,14 @@ class Duel
 	end
 
 	def query_all_commands
-		[]
-	end
-
-	def query_all_cards
-		log "query all cards"
-		commands = get_all_commands
+		log "query all commands"
+		commands = []
+		commands += all_cards.map{|c|
+			c.get_commands
+		}.reduce(:+)
 		if commands.length > 0
-			goto :choose_command, :commands => commands, :priority_player => @td[:priority_player]
+			goto :choose_command, :commands => commands
 		end
-		commands.length
-	end
-
-	def query_player(player)
-		log "query player: #{player}"
-		commands = player.get_commands
-		if commands.length > 0
-			goto :choose_command, :commands => commands, :priority_player => @td[:priority_player]
-		end
+		commands
 	end
 end

@@ -108,8 +108,7 @@ class Timing
 	end
 
 	create :totally_free do
-		commands = self.get_all_commands
-		goto :choose_command, :commands => commands, :priority_player => @td[:priority_player]
+		choose_commands @priority_player.get_commands
 	end
 
 	create :choose_command do
@@ -120,33 +119,28 @@ class Timing
 		log "[#{commands.map do |c|
 			c.to_s
 		end.join ", "}]"
-		priority_player_force_commands = select_all_force_commands commands, @td[:priority_player]
+		priority_player_force_commands = commands.force_commands.commands_for_player @priority_player
 		if priority_player_force_commands.count > 0
 			command = choose_one_command priority_player_force_commands
 			command.execute
 			next
 		end
-		other_player_force_commands = select_all_force_commands commands, @td[:priority_player].other_player
+		other_player_force_commands = commands.force_commands.commands_for_player @priority_player.opponent
 		if other_player_force_commands.count > 0
 			command = choose_one_command other_player_force_commands
 			command.execute
 			next
 		end
-		priority_player_optional_commands = select_all_optional_commands commands, @td[:priority_player]
+		priority_player_optional_commands = commands.optional_commands.commands_for_player @priority_player
 		if priority_player_optional_commands.count > 0
 			command = choose_one_command priority_player_optional_commands
 			command.execute
 			next
 		end
 		raise "Impossible: only priority player optional commands choose available"
-		other_player_optional_commands = select_all_optional_commands commands, @td[:priority_player].other_player
-		if other_player_optional_commands.count > 0
-			command = choose_one_command other_player_optional_commands
-			command.execute
-			next
-		end
-		raise Exception.new "impossible: no force/optional commands chosen"
 	end
+
+	todo "need rewrite following definitions"
 
 	create :normal_summon_monster do
 		goto :quit

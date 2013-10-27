@@ -81,14 +81,6 @@ class Player
 		@life_point = 8000
 	end
 
-	def get_all_card_commands
-		commands = []
-		all_my_cards.each do |c|
-			commands += c.get_commands
-		end
-		commands
-	end
-
 	def all_my_cards
 		all_cards = []
 		all_cards += deck_zone.cards

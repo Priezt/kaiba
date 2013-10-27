@@ -9,11 +9,15 @@ module GetCommands
 	end
 end
 
-class Object
+module Kernel
 	def log(msg)
 		File.open(",duel.log", "a") do |f|
 			f.puts msg
 		end
+	end
+
+	def todo(msg="")
+		raise "Not implemented yet: #{msg}"
 	end
 end
 

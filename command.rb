@@ -1,3 +1,26 @@
+class Array
+	def commands_for_player(player)
+		log "select all commands for player: #{player}"
+		self.select  do |c|
+			c.player == player
+		end
+	end
+
+	def force_commands
+		log "select all force commands"
+		self.select  do |c|
+			c.data[:force]
+		end
+	end
+
+	def optional_commands
+		log "select all optional commands"
+		self.select  do |c|
+			c.data[:optional]
+		end
+	end
+end
+
 class Command
 	attr_accessor :player, :type, :data
 

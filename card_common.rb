@@ -69,6 +69,22 @@ class Card
 	def method_missing(method_name, *args, &block)
 		self.class.send method_name, *args, &block
 	end
+
+	def optional(command_sym, args={})
+		args[:card] = self
+		args[:optional] = true
+		Commands.new controller, command_sym, args
+	end
+
+	def force(command_sym, args={})
+		args[:card] = self
+		args[:force] = true
+		Commands.new controller, command_sym, args
+	end
+
+	def controller
+		self.zone.side.player
+	end
 end
 
 class Card
@@ -113,15 +129,17 @@ class MonsterCard < Card
 	add_prop :defend
 
 	def at_pick_release
+		todo "release condition"
 		return unless is{
 			monster
 		}
 		[
-			Command.new(@player, :release, :card => self, :optional => true),
+			optional :release
 		]
 	end
 
 	def at_totally_free
+		todo "implement using new way: is and force/optional"
 		return unless under(:phase_main) and @player.normal_summon_allowed_count > 0 and @player == duel.td[:priority_player] and is{ on :hand }
 		if self.level <= 4
 			[
