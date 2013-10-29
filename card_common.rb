@@ -7,7 +7,7 @@ class Card
 	end
 
 	def is(&block)
-		[self].only(&block).length > 0
+		[self].only(&block, @duel).length > 0
 	end
 
 	def under(timing)
@@ -129,9 +129,9 @@ class MonsterCard < Card
 	add_prop :defend
 
 	def at_pick_release
-		todo "release condition"
 		return unless is{
 			monster
+			on :monster
 		}
 		[
 			optional :release
@@ -139,21 +139,26 @@ class MonsterCard < Card
 	end
 
 	def at_totally_free
-		todo "implement using new way: is and force/optional"
-		return unless under(:phase_main) and @player.normal_summon_allowed_count > 0 and @player == duel.td[:priority_player] and is{ on :hand }
+		return unless is{
+			under :phase_main
+			on :hand
+		}
+		return unless @player.normal_summon_allowed_count > 0 and @player == duel.priority_player
 		if self.level <= 4
 			[
-				Command.new(@player, :summon, :card => self, :optional => true),
-				Command.new(@player, :monster_set, :card => self, :optional => true),
+				optional(:summon),
+				optional(:monster_set),
 			]
 		elsif self.level > 4
-			available_release_value = duel.all_cards.map{|c|
+			available_release_value = duel.all_cards.only{
+				on :monster
+			}.map{|c|
 				self.release_consume c
 			}.reduce(:+)
 			if available_release_value >= summon_release_cost
 				[
-					Command.new(@player, :advance_summon, :card => self, :optional => true),
-					Command.new(@player, :advance_monster_set, :card => self, :optional => true),
+					optional(:advance_summon),
+					optional(:advance_monster_set),
 				]
 			end
 		end

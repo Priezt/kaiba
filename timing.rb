@@ -140,13 +140,12 @@ class Timing
 		raise "Impossible: only priority player optional commands choose available"
 	end
 
-	todo "need rewrite following definitions"
-
 	create :normal_summon_monster do
-		goto :quit
 		goto :about_to_summon
 		goto :pick_summon_zone, :player => @td[:card].player
 	end
+
+	todo "need rewrite following definitions"
 
 	create :advance_summon_monster do
 		release_left = @td[:card].release_cost

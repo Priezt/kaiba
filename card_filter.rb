@@ -1,6 +1,7 @@
 class CardFilter
-	def initialize(cards)
+	def initialize(cards, duel=nil)
 		@cards = cards
+		@duel = duel
 	end
 
 	def self.card_type(sym)
@@ -37,14 +38,18 @@ class CardFilter
 		end
 	end
 
+	def under(timing)
+		@duel.under timing
+	end
+
 	def result
 		@cards
 	end
 end
 
 class Array
-	def only(&block)
-		card_filter = CardFilter.new self
+	def only(duel=nil, &block)
+		card_filter = CardFilter.new self, duel
 		card_filter.instance_eval &block
 		card_filter.result
 	end
