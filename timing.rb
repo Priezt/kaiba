@@ -4,14 +4,16 @@ class << Timing
 	attr_accessor :enter_proc
 	attr_accessor :leave_proc
 
-	def create(classname, &block)
-		create_raw(classname) do
+	def create(classname, timing_option={}, &block)
+		create_raw(classname, timing_option) do
 			enter &block
 		end
 	end
 
-	def create_raw(classname, &block)
-		self.const_set classname.to_s.camel, Class.new(Timing){ }
+	def create_raw(classname, timing_option={}, &block)
+		self.const_set classname.to_s.camel, Class.new(Timing){
+			@@timing_option = timing_option
+		}
 		if block
 			(self.const_get classname.to_s.camel).class_eval &block
 		end
@@ -145,33 +147,29 @@ class Timing
 		goto :pick_summon_zone, :player => @td[:card].player
 	end
 
+	create :advance_summon_monster do
+		@last[:release_left] = @td[:card].release_cost
+		@last[:summon_card] = @td[:card]
+		log "need #{release_left} monsters to release"
+		start_game
+		queue :pick_release, :pick_summon_zone, :about_to_summon
+	end
+
 	todo "need rewrite following definitions"
 
-	create :advance_summon_monster do
-		release_left = @td[:card].release_cost
-		log "need #{release_left} monsters to release"
-		goto :about_to_summon
-		goto :pick_summon_zone
-		if release_left > 0
-			goto :pick_release, :summon_card => @td[:card], :release_left => release_left
+	create :pick_release do
+		@last[:release_left] -= @last[:release_value]
+		if @last[:release_left] > 0
+			goto :pick_release
 		end
 	end
 
-	create :pick_release do
-		release_left = @td[:release_left]
-		release_commands = self.get_all_commands
-		p release_commands
-		goto :quit
-	end
-
-	create :pick_summon_zone do
-		commands = @td[:player].get_commands
-		goto :choose_command, :commands => commands, :priority_player => @td[:player]
+	create :pick_summon_zone, :need_player_commands => true do
 	end
 
 	create :about_to_summon do
 		puts "#{@last_picked_zone}"
-		query_all_cards
+		goto :quit
 	end
 end
 require './phase'

@@ -13,6 +13,7 @@ class Duel
 	end
 
 	def start(start_timing = :prepare_game)
+		@last = {}
 		self.push_timing start_timing
 		while @timing_stack.length > 0
 			self.run_timing
@@ -26,6 +27,7 @@ class Duel
 	end
 
 	alias stack push_multiple_timing
+	alias queue push_multiple_timing
 
 	alias goto push_timing
 	alias pass push_timing_with_pass
@@ -71,13 +73,16 @@ class Duel
 		pass @td
 		unless @td[:pass]
 			commands = query_all_commands
+			if @current_timing.instance_eval{@@timing_option}[:need_player_commands]
+				commands += query_player_commands
+			end
 			if commands.length > 0
 				return
 			else
 				@timing_stack.pop
 			end
 		end
-		@last_data = self.instance_eval &(@current_timing.class.enter_proc)
+		self.instance_eval &(@current_timing.class.enter_proc)
 		after_timing = Timing::AfterTiming.new
 		#after_timing.timing_data = @current_timing # I forget what is this for
 		self.instance_eval &(after_timing.class.enter_proc)

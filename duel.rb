@@ -98,4 +98,10 @@ class Duel
 		end
 		commands
 	end
+
+	def query_player_commands
+		players.each_value.map{|p|
+			p.get_commands
+		}.reduce(:+)
+	end
 end

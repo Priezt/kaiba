@@ -100,13 +100,22 @@ class Player
 
 	include GetCommands
 
+	def optional(command_sym, args={})
+		args[:optional] = true
+		Commands.new self, command_sym, args
+	end
+
+	def force(command_sym, args={})
+		args[:force] = true
+		Commands.new self, command_sym, args
+	end
+
 	def at_totally_free
+		return unless @duel.turn_player == self
 		commands = []
-		if @duel.turn_player == self
-			commands << Command.new(self, :turn_end, :optional => true)
-			if @duel.under :phase_main1
-				commands << Command.new(self, :enter_battle, :optional => true)
-			end
+		commands << optional(:turn_end)
+		if @duel.under :phase_main1
+			commands << optional(:enter_battle)
 		end
 		commands
 	end
@@ -115,7 +124,7 @@ class Player
 		monster_zones.select do |z|
 			z.empty?
 		end.map do |z|
-			Command.new self, :pick_zone, :zone => z, :force => true
+			optional :pick_zone, :zone => z
 		end
 	end
 end
