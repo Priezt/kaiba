@@ -87,21 +87,28 @@ class Duel
 		cards
 	end
 
-	def query_all_commands
-		log "query all commands"
+	def query_all_commands(need_player_commands=false)
+		log "query all commands#{
+			if need_player_commands
+				" with player commands"
+			else
+				""
+			end
+		}"
 		commands = []
-		commands += all_cards.map{|c|
-			c.get_commands
-		}.reduce(:+)
+		if all_cards.length > 0
+			commands += all_cards.map{|c|
+				c.get_commands || []
+			}.reduce(:+)
+		end
+		if need_player_commands
+			commands += players.each_value.map{|p|
+				p.get_commands
+			}.reduce(:+)
+		end
 		if commands.length > 0
 			goto :choose_command, :commands => commands
 		end
 		commands
-	end
-
-	def query_player_commands
-		players.each_value.map{|p|
-			p.get_commands
-		}.reduce(:+)
 	end
 end

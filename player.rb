@@ -102,12 +102,12 @@ class Player
 
 	def optional(command_sym, args={})
 		args[:optional] = true
-		Commands.new self, command_sym, args
+		Command.new self, command_sym, args
 	end
 
 	def force(command_sym, args={})
 		args[:force] = true
-		Commands.new self, command_sym, args
+		Command.new self, command_sym, args
 	end
 
 	def at_totally_free

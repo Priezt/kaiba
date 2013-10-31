@@ -7,7 +7,7 @@ class Card
 	end
 
 	def is(&block)
-		[self].only(&block, @duel).length > 0
+		[self].only(@duel, &block).length > 0
 	end
 
 	def under(timing)
@@ -73,13 +73,13 @@ class Card
 	def optional(command_sym, args={})
 		args[:card] = self
 		args[:optional] = true
-		Commands.new controller, command_sym, args
+		Command.new controller, command_sym, args
 	end
 
 	def force(command_sym, args={})
 		args[:card] = self
 		args[:force] = true
-		Commands.new controller, command_sym, args
+		Command.new controller, command_sym, args
 	end
 
 	def controller
@@ -134,7 +134,7 @@ class MonsterCard < Card
 			on :monster
 		}
 		[
-			optional :release
+			optional(:release)
 		]
 	end
 

@@ -26,12 +26,6 @@ class Duel
 		self.push_timing new_timing_symbol, args
 	end
 
-	alias stack push_multiple_timing
-	alias queue push_multiple_timing
-
-	alias goto push_timing
-	alias pass push_timing_with_pass
-
 	def push_multiple_timing(*new_timing_symbol_list)
 		new_timing_symbol_list.reverse.each do |t|
 			if t.class == Symbol
@@ -66,16 +60,19 @@ class Duel
 		@timing_stack.push new_timing
 	end
 
+	alias stack push_multiple_timing
+	alias queue push_multiple_timing
+
+	alias goto push_timing
+	alias pass push_timing_with_pass
+
 	def run_timing
 		@current_timing = @timing_stack.pop
 		@td = @current_timing.timing_data
 		log "enter #{@current_timing.class.to_s}"
-		pass @td
+		pass @current_timing.class.to_s.sub(/.*:/, '').uncamel
 		unless @td[:pass]
-			commands = query_all_commands
-			if @current_timing.instance_eval{@@timing_option}[:need_player_commands]
-				commands += query_player_commands
-			end
+			commands = query_all_commands @current_timing.instance_eval{self.class.timing_option}[:need_player_commands]
 			if commands.length > 0
 				return
 			else

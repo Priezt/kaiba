@@ -3,6 +3,7 @@ class Timing; end
 class << Timing
 	attr_accessor :enter_proc
 	attr_accessor :leave_proc
+	attr_accessor :timing_option
 
 	def create(classname, timing_option={}, &block)
 		create_raw(classname, timing_option) do
@@ -12,7 +13,7 @@ class << Timing
 
 	def create_raw(classname, timing_option={}, &block)
 		self.const_set classname.to_s.camel, Class.new(Timing){
-			@@timing_option = timing_option
+			self.timing_option = timing_option
 		}
 		if block
 			(self.const_get classname.to_s.camel).class_eval &block
@@ -109,8 +110,7 @@ class Timing
 		tp.draw_card
 	end
 
-	create :totally_free do
-		choose_commands @priority_player.get_commands
+	create :totally_free, :need_player_commands => true do
 	end
 
 	create :choose_command do
@@ -154,8 +154,6 @@ class Timing
 		start_game
 		queue :pick_release, :pick_summon_zone, :about_to_summon
 	end
-
-	todo "need rewrite following definitions"
 
 	create :pick_release do
 		@last[:release_left] -= @last[:release_value]
