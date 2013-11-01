@@ -1,6 +1,7 @@
 class Timing
 	create :enter_phase_draw do
-		stack :before_draw,
+		stack :enter_phase,
+			:before_draw,
 			:draw_card,
 			:after_draw,
 			:phase_draw,
@@ -8,30 +9,35 @@ class Timing
 	end
 
 	create :enter_phase_standby do
-		stack :phase_standby,
+		stack :enter_phase,
+			:phase_standby,
 			:enter_phase_main1
 	end
 
 	create :enter_phase_main1 do
-		stack [:totally_free, {:priority_player => tp}],
+		stack :enter_phase,
+			[:totally_free, {:priority_player => tp}],
 			:phase_main1,
 			:phase_main,
 			:enter_phase_battle
 	end
 
 	create :enter_phase_battle do
-		stack :phase_battle,
+		stack :enter_phase,
+			:phase_battle,
 			:enter_phase_main2
 	end
 
 	create :enter_phase_main2 do
-		stack :phase_main2,
+		stack :enter_phase,
+			:phase_main2,
 			:phase_main,
 			:enter_phase_end
 	end
 
 	create :enter_phase_end do
-		stack :phase_end,
+		stack :enter_phase,
+			:phase_end,
 			:enter_turn
 	end
 end

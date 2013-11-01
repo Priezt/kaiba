@@ -62,7 +62,7 @@ class Command
 	def execute_pick_zone
 		picked_zone = @data[:zone]
 		duel.instance_eval do
-			@last_picked_zone = picked_zone
+			@last[:picked_zone] = picked_zone
 		end
 	end
 end

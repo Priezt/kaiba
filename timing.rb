@@ -5,6 +5,10 @@ class << Timing
 	attr_accessor :leave_proc
 	attr_accessor :timing_option
 
+	def create_p(classname, &block)
+		create classname, :need_player_commands => true, &block
+	end
+
 	def create(classname, timing_option={}, &block)
 		create_raw(classname, timing_option) do
 			enter &block
@@ -97,6 +101,10 @@ class Timing
 		goto :enter_turn
 	end
 
+	create :enter_phase do
+		@priority_player = tp
+	end
+
 	create :enter_turn do
 		@turn_count += 1
 		self.switch_player
@@ -110,7 +118,7 @@ class Timing
 		tp.draw_card
 	end
 
-	create :totally_free, :need_player_commands => true do
+	create_p :totally_free do
 	end
 
 	create :choose_command do
@@ -151,8 +159,7 @@ class Timing
 		@last[:release_left] = @td[:card].release_cost
 		@last[:summon_card] = @td[:card]
 		log "need #{release_left} monsters to release"
-		start_game
-		queue :pick_release, :pick_summon_zone, :about_to_summon
+		queue :pick_release, [:pick_summon_zone, :player => @td[:card].player], :about_to_summon
 	end
 
 	create :pick_release do
@@ -162,11 +169,11 @@ class Timing
 		end
 	end
 
-	create :pick_summon_zone, :need_player_commands => true do
+	create_p :pick_summon_zone do
 	end
 
 	create :about_to_summon do
-		puts "#{@last_picked_zone}"
+		puts "#{@last[:picked_zone]}"
 		goto :quit
 	end
 end

@@ -121,10 +121,8 @@ class Player
 	end
 
 	def at_pick_summon_zone
-		monster_zones.select do |z|
-			z.empty?
-		end.map do |z|
-			optional :pick_zone, :zone => z
+		monster_zones.select(&:available?).map do |z|
+			force :pick_zone, :zone => z
 		end
 	end
 end

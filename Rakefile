@@ -17,7 +17,7 @@ duel = Duel.new Player.new("Kaiba"), Player.new("Yugi")
 	end
 end
 
-task :default => [:test]
+task :default => [:interactive_console]
 
 desc "common test"
 task :test do
