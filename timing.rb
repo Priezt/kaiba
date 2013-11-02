@@ -173,7 +173,7 @@ class Timing
 	end
 
 	create :about_to_summon do
-		puts "#{@last[:picked_zone]}"
+		puts "about to summon at #{@last[:picked_zone]}"
 		goto :quit
 	end
 end

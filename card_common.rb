@@ -154,7 +154,7 @@ class MonsterCard < Card
 				on :monster
 			}.map{|c|
 				self.release_consume c
-			}.reduce(:+)
+			}.reduce(0, &:+)
 			if available_release_value >= summon_release_cost
 				[
 					optional(:advance_summon),
