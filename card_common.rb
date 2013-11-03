@@ -90,6 +90,12 @@ end
 class Card
 	include GetCommands
 
+	def pick
+		self.zone.cards.delete self
+		self.zone = nil
+		self
+	end
+
 	def in_zone(z)
 		current_zone_name = @zone.to_s.sub /:.*/, ''
 		zn = z.to_s
@@ -172,6 +178,11 @@ class MonsterCard < Card
 		else
 			2
 		end
+	end
+
+	def summon(target_zone)
+		log "summon #{self} from #{zone} to #{target_zone}"
+		target_zone.push pick
 	end
 end
 

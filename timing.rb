@@ -151,8 +151,14 @@ class Timing
 	end
 
 	create :normal_summon_monster do
-		goto :about_to_summon
-		goto :pick_summon_zone, :player => @td[:card].player
+		queue [:pick_summon_zone, :player => @td[:card].player],
+			:about_to_summon,
+			[:summon, :card => @td[:card]]
+	end
+
+	create :summon do
+		@td[:card].summon @last[:picked_zone]
+		goto :quit
 	end
 
 	create :advance_summon_monster do
@@ -174,7 +180,6 @@ class Timing
 
 	create :about_to_summon do
 		puts "about to summon at #{@last[:picked_zone]}"
-		goto :quit
 	end
 end
 require './phase'
