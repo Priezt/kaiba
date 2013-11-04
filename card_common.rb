@@ -183,6 +183,7 @@ class MonsterCard < Card
 	def summon(target_zone)
 		log "summon #{self} from #{zone} to #{target_zone}"
 		target_zone.push pick
+		duel.goto :summoned
 	end
 end
 

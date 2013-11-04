@@ -74,8 +74,10 @@ class Duel
 			pass @current_timing.class.to_s.sub(/.*:/, '').uncamel
 			commands = query_all_commands @current_timing.instance_eval{self.class.timing_option}[:need_player_commands]
 			if commands.length > 0
+				@last[:has_commands] = true
 				return
 			else
+				@last[:has_commands] = false
 				@timing_stack.pop
 			end
 		end

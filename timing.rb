@@ -181,5 +181,9 @@ class Timing
 	create :about_to_summon do
 		puts "about to summon at #{@last[:picked_zone]}"
 	end
+
+	create :summoned do
+		goto :totally_free
+	end
 end
 require './phase'
