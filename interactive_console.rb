@@ -17,7 +17,7 @@ class InteractiveConsole
 	def choose_one_command(commands)
 		list commands
 		while true
-			print "> "
+			print "#{@duel.first_not_choose_timing.class.to_s.sub(/.*:/, '')}> "
 			STDOUT.flush
 			cmd = STDIN.readline.chomp
 			if cmd =~ /^(\d+)$/
@@ -29,6 +29,8 @@ class InteractiveConsole
 				end
 			elsif cmd =~ /^list$/
 				list commands
+			elsif cmd =~ /^stack$/
+				puts @duel.dump_timing_stack
 			else
 				begin
 					puts eval cmd

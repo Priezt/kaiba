@@ -66,6 +66,10 @@ class Duel
 	alias goto push_timing
 	alias pass push_timing_with_pass
 
+	def repeat
+		goto @current_timing.class.to_s.sub(/.*:/, '').uncamel.to_sym
+	end
+
 	def run_timing
 		@current_timing = @timing_stack.pop
 		@td = @current_timing.timing_data
@@ -97,5 +101,13 @@ class Duel
 
 	def choose_command(commands)
 		goto :choose_command, :commands => commands
+	end
+
+	def first_not_choose_timing
+		@timing_stack.reverse.each do |t|
+			if not t.is(:choose_command)
+				return t
+			end
+		end
 	end
 end

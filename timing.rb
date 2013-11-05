@@ -119,6 +119,11 @@ class Timing
 	end
 
 	create_p :totally_free do
+		if @last[:has_commands]
+			repeat
+		else
+			raise 'No commands at totally_free'
+		end
 	end
 
 	create :choose_command do
@@ -158,7 +163,6 @@ class Timing
 
 	create :summon do
 		@td[:card].summon @last[:picked_zone]
-		goto :quit
 	end
 
 	create :advance_summon_monster do
@@ -179,11 +183,10 @@ class Timing
 	end
 
 	create :about_to_summon do
-		puts "about to summon at #{@last[:picked_zone]}"
+		log "about to summon at #{@last[:picked_zone]}"
 	end
 
 	create :summoned do
-		goto :totally_free
 	end
 end
 require './phase'
