@@ -58,6 +58,7 @@ class Duel
 		new_timing = eval "Timing::#{new_timing_symbol.to_s.camel}.new"
 		new_timing.timing_data = args
 		@timing_stack.push new_timing
+		new_timing
 	end
 
 	alias stack push_multiple_timing
@@ -75,16 +76,17 @@ class Duel
 		@td = @current_timing.timing_data
 		log "enter #{@current_timing.class.to_s}"
 		unless @td[:pass]
-			pass @current_timing.class.to_s.sub(/.*:/, '').uncamel
+			timing_clone = pass @current_timing.class.to_s.sub(/.*:/, '').uncamel
 			commands = query_all_commands @current_timing.instance_eval{self.class.timing_option}[:need_player_commands]
 			if commands.length > 0
-				@last[:has_commands] = true
+				timing_clone.timing_data[:has_commands] = true
 				return
 			else
-				@last[:has_commands] = false
+				timing_clone.timing_data[:has_commands] = false
 				@timing_stack.pop
 			end
 		end
+		@last[:has_commands] = @current_timing.timing_data[:has_commands]
 		self.instance_eval &(@current_timing.class.enter_proc)
 		after_timing = Timing::AfterTiming.new
 		#after_timing.timing_data = @current_timing # I forget what is this for

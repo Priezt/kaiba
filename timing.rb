@@ -122,7 +122,7 @@ class Timing
 		if @last[:has_commands]
 			repeat
 		else
-			raise 'No commands at totally_free'
+			raise "No commands for totally_free"
 		end
 	end
 
