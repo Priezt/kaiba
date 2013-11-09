@@ -66,5 +66,13 @@ class Command
 			@last[:picked_zone] = picked_zone
 		end
 	end
+
+	def execute_turn_end
+		duel.queue :end_phase_main, :enter_phase_end
+	end
+
+	def execute_enter_battle
+		duel.queue :end_phase_main, :enter_phase_battle
+	end
 end
 
