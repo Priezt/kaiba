@@ -112,4 +112,10 @@ class Duel
 			end
 		end
 	end
+
+	def chain(action)
+		goto :chain, :action => action
+		switch_priority
+		goto :free_chain
+	end
 end

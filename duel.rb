@@ -1,4 +1,5 @@
 require './tools'
+require './action'
 require './command'
 require './card_common'
 require './card'

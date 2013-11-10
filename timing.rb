@@ -188,5 +188,11 @@ class Timing
 
 	create :summoned do
 	end
+
+	create :chain do
+	end
+
+	create :free_chain do
+	end
 end
 require './phase'
