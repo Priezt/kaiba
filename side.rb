@@ -26,4 +26,11 @@ class Side
 			z.dump
 		end.join " ")
 	end
+
+	def snapshot
+		{
+			:player => player.to_s,
+			:zones => todo("snapshot for zones"),
+		}
+	end
 end

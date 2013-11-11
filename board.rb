@@ -10,4 +10,10 @@ class Board
 			s.dump + "\n"
 		end.join ""
 	end
+
+	def snapshot
+		{
+			:sides => sides.each_value.map(&:snapshot)
+		}
+	end
 end

@@ -125,5 +125,12 @@ class Player
 			force :pick_zone, :zone => z
 		end
 	end
+
+	def snapshot
+		{
+			:name => @name,
+			:life_point => @life_point,
+		}
+	end
 end
 

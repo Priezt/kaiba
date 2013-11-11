@@ -38,4 +38,8 @@ class Zone
 	end
 
 	alias empty? available?
+
+	def snapshot
+		todo "snapshot for zone"
+	end
 end

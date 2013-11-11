@@ -1,3 +1,4 @@
+require 'json'
 require './tools'
 require './action'
 require './command'
@@ -111,5 +112,19 @@ class Duel
 			goto :choose_command, :commands => commands
 		end
 		commands
+	end
+
+	def snapshot
+		{
+			:players => players.each_value.to_a.map(&:snapshot),
+			:board => board.snapshot,
+			:turn_count => turn_count,
+			:turn_player => turn_player.to_s,
+			:timing_stack => @timing_stack.map(&:to_s)
+		}
+	end
+
+	def to_json
+		snapshot.to_json
 	end
 end

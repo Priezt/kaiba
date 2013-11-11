@@ -1,3 +1,5 @@
+require 'json'
+
 class InteractiveConsole
 	def initialize(d)
 		@duel = d
@@ -31,6 +33,8 @@ class InteractiveConsole
 				list commands
 			elsif cmd =~ /^stack$/
 				puts @duel.dump_timing_stack
+			elsif cmd =~ /^json$/
+				puts JSON.pretty_generate(@duel.snapshot)
 			else
 				begin
 					puts eval cmd
